@@ -1,0 +1,639 @@
+                    CSIT5900
+           Lecture 2: Designing Agents
+
+
+          Department of Computer Science and Engineering
+          Hong Kong University of Science and Technology
+
+
+
+
+(HKUST)                Lecture 2: Reactive Agents          1 / 36
+Overview
+
+
+   Agent is a term referring to entities that can perform certain tasks in
+   some environments autonomously.
+   An agent needs to have perception, can perform some actions, has
+   some purpose (goal).
+   Formally an agent’s capability is defined by actions and states, its
+   behavior by its controller which should be goal directed.
+   We consider first agents whose states are the same as their physical
+   sensors (so-called reactive or stimulus-response agents), and how to
+   control these agents using neural networks, rules by design, rules by
+   genetic algorithms, and rules by LLMs.
+
+
+
+
+      (HKUST)               Lecture 2: Reactive Agents                     2 / 36
+A Boundary-Following Robot
+A robot in a two-dimensional grid world:
+                                      The robot senses whether
+                                      the eight surrounding cells
+                                      are free for it to occupy
+  Boundary
+
+                                     s1 s2    s3
+                                     s8       s4
+                                     s7 s6    s5
+
+
+Solid
+object
+
+
+
+
+         A robot starting here will go                 A robot starting here will
+         counterclockwise around the                   go clockwise around the
+         outside boundary of the object                inside of the outer boundary
+         © 1998 Morgan Kaufmann Publishers
+
+                  (HKUST)                                  Lecture 2: Reactive Agents   3 / 36
+Sensors and Actions
+
+
+States: all possible combinations of the following eight binary sensors: s1 -
+s8 . si = 1 if the corresponding cell is occupied, it equals to 0 otherwise.
+Actions: the robot can move to an adjacent free cell. There are four of
+them:
+  1   north - moves the robot one cell up.
+  2   east - moves the robot one cell to the right.
+  3   south - moves the robot one cell down.
+  4   west - moves the robot one cell to the left.
+All of them have their indicated effects unless the robot attempts to move
+to a cell that is not free; in that case, it have no effect.
+
+
+
+
+         (HKUST)               Lecture 2: Reactive Agents                  4 / 36
+Controling a robot
+
+
+
+
+We now have a model of the problem: an environment modeled by a
+two-dimensional grid world, an agent with sensors to check if any of the
+nearby cells is occupied, a collection of actions for moving around the
+world, and the task of following the boundary of the first obstacle that it
+comes into.
+We now need an algorithm to control the robot!
+
+
+
+
+        (HKUST)               Lecture 2: Reactive Agents                  5 / 36
+Learning Action Function - Supervised Learning
+with TLUs
+
+
+
+
+     (HKUST)       Lecture 2: Reactive Agents    6 / 36
+Supervised Learning
+
+Given a training set consisting of
+    a set Σ of n-dimensional vectors (these vectors could be the vectors
+    of the robot’s sensory inputs, or they might be the feature vectors
+    computed by the perceptual processing component);
+    for each vector in Σ, an associated action called label of the vector
+    (this action could be the one that the learner observed performed by
+    the teacher, or simply the desired action given by the designer of a
+    robot);
+the task of learning is to compute a function that responds ”acceptably”
+to the members of the training set: this usually means that the function
+agrees with as many members of the training set as possible.
+What functions to learn is crucial. Here we consider a class of simple linear
+weighted functions called TLUs.
+
+
+        (HKUST)               Lecture 2: Reactive Agents                   7 / 36
+Example - When to Move East
+A training set for learning when to move east:
+                        2
+
+
+
+
+1                                                    3
+
+
+
+
+6
+                                                     4
+                                   5
+
+
+Input              Sensory             x1 x2
+number             vector              (move east)
+1                  000011 0 0          0
+2                  11100 00 0          1
+3                  001000 00           1
+4                  000000 00           0
+5                  000010 00           0
+6                  011000 0 0          1
+© 1998 Morgan Kaufman Publishers
+
+
+
+                       (HKUST)                           Lecture 2: Reactive Agents   8 / 36
+TLUs
+   Boolean functions, thus those production systems whose conditions
+   are Boolean functions can be implemented easily as programs. They
+   can also be implemented directly as circuits.
+   A type of circuits of particular interest in AI is threshold logic unit
+   (TLU), also called perceptron:
+   x1
+                                             Weighted sum
+   x2                               w1         n
+                               w2              Σ x i wi
+        ...                                    i=1                 Output, f
+
+   xi
+                             wi          Σ
+                                  wn                      Threshold, θ
+        ...
+   xn
+
+                n
+   f = 1 if Σ xi wi ≥ θ
+                i=1
+    = 0 otherwise
+   © 1998 Morgan Kaufmann Publishers
+
+
+
+
+              (HKUST)                         Lecture 2: Reactive Agents       9 / 36
+TLUs
+
+
+Not all Boolean functions can be implemented as TLUs - those can are
+called linearly separable functions. Here is an example:
+
+x1           1
+            –1
+x2                        1.5        x1 x 2 x3
+
+x3           1
+© 1998 Morgan Kaufman Publishers
+
+
+
+
+           (HKUST)                 Lecture 2: Reactive Agents          10 / 36
+Neurons
+TLU is a very simple model of neurons.
+http://en.wikipedia.org/wiki/Neuron:
+    A neuron is an electrically excitable cell that processes and transmits
+    information through electrical and chemical signals via synapses.
+    Neurons when connect to each other form neural networks, and are
+    the core components of the nervous system.
+    The number of neurons in the brain varies dramatically from species
+    to species.
+    One estimate (published in 1988) puts the human brain at about 100
+    billion (1011 ) neurons and 100 trillion (1014 ) synapses.
+    The fruit fly Drosophila melanogaster, a common subject in biological
+    experiments, has around 100,000 neurons and exhibits many complex
+    behaviors.
+
+       (HKUST)               Lecture 2: Reactive Agents                  11 / 36
+Learning TLUs
+
+
+Recall that a TLU is determined by:
+    number of inputs;
+    for each input an associated number called its weight;
+    a number called the threshold.
+We know the number of inputs from the training set; we can assume that
+the threshold is always o by introducing a new input with its weight set to
+be the negative of the original threshold, and its input always set to 1.
+So what we need to learn is the vector of weights.
+
+
+
+
+        (HKUST)              Lecture 2: Reactive Agents                 12 / 36
+The Error-Correction Procedure
+Given a vector X from the training set (augmented by the n + 1th special
+input 1), let d be the label (desired output) of this input, and f the actual
+output of the old TLU, the weight change rule is:
+
+                            W ← W + c(d − f )X ,
+
+where c, a number, is called the learning rate.
+To use this rule to learn a TLU: start with a random initial weight vector,
+choose a learning rate c, and then iterate through the set of training set
+repeatedly until it becomes stable.
+If the traning set can be captured by a linearly separable Boolean function,
+then this procedure will terminate. The exact number of steps needed
+depends on:
+    Initial weight values
+    Learning rate in weight updating rule
+    Order of presentation of training examples
+        (HKUST)                Lecture 2: Reactive Agents                 13 / 36
+Activation Functions
+
+
+    A TLU (perceptron) is a simple model of a neuron. According to it, a
+    neuron is either on or off.
+    There are many other models or activation functions, and almost all
+    of them are defined using the weighted sum, also called score, of the
+    inputs w · x.
+    Linear activation: output(x) = a + w · x.
+    ReLU activation: output(x) = max(0, a + w · x).
+    Logistic activation: output(x) = (1 + exp(−a − w · x))−1 .
+    See https://en.wikipedia.org/wiki/Activation_function for
+    more.
+
+
+
+       (HKUST)              Lecture 2: Reactive Agents                 14 / 36
+Artificial Neural Networks
+    An (artificial) neural network is a directed graph whose nodes are
+    models of neurons.
+    The sources (no incoming arcs) are inputs and the targets (no
+    outgoing arcs) are outputs. The internal nodes represent “hidden”
+    features.
+    A general description of machine learning algorithms for training a
+    neural network is as follows
+        Initialize w (e.g. 0);
+        while C {
+            w = successor (w );
+            update C ; }
+    where C is the condition for keep updating the weights, e.g. it can be
+    i ≤ N for some fixed N or could be a condition about the desired
+    accuracy; successor (w ) returns a “better” w and is computed using
+    training instances and the loss function.
+    In ML, two popular ways of updating weights are so called gradient
+    descend and stochastic gradient descend.
+       (HKUST)                Lecture 2: Reactive Agents                  15 / 36
+Designing Action Functions - Production Systems
+
+
+
+
+     (HKUST)      Lecture 2: Reactive Agents   16 / 36
+Basic Architecture
+Designer’s job: specify a function of the sensory inputs that selects actions
+appropriate for the task at the hand (boundry-following in our example).
+In general, it is often convenient to divide the function into two
+components: perceptual processing and action function:
+                                                  Designer’s intended
+                                                  meanings:
+
+                                              0   Next to wall
+                      Feature
+                      vector, X               1
+                                              1
+                                              1   In a corner
+                                              1
+
+Sensory       Perceptual                              Action
+              processing                              function          Action
+input
+
+
+
+
+          © 1998 Morgan Kaufmann Publishers
+
+
+
+
+           (HKUST)                                 Lecture 2: Reactive Agents    17 / 36
+Perception
+
+
+   There are 28 = 256 states from 8 sensory inputs s1 ,...,s8 .
+   For the task at the hand, we only need four binary-valued features:
+   x1 , x2 , x3 , x4 :
+
+
+
+
+             x1                       x2                       x3                        x4
+   In each diagram, the indicated feature has value 1 if and only if at least one of the shaded
+   cells is not free.
+   © 1998 Morgan Kaufman Publishers
+
+
+
+
+             (HKUST)                                     Lecture 2: Reactive Agents               18 / 36
+Action
+
+
+Given the four features, we can specify a function of these features that
+will select the right action for boundary-following as follows:
+    if none of the four features equal to 1, then move north (it could be
+    any direction).
+    if x1 = 1 and x2 = 0, then move east;
+    if x2 = 1 and x3 = 0, then move south;
+    if x3 = 1 and x4 = 0, then move west;
+    if x4 = 1 and x1 = 0, then move north.
+We now need to represent and implement perception and action functions.
+To that end, we briefly review Boolean algebra below.
+
+
+
+         (HKUST)             Lecture 2: Reactive Agents                     19 / 36
+Boolean Algebra
+
+
+   A Boolean function maps an n tuple of (0, 1) values to {0, 1};
+   Boolean algebra is a convenient notation for representing Boolean
+   functions using · (and, often omitted), + (or), and − (negation):
+
+                       1 + 1 = 1, 1 + 0 = 1, 0 + 0 = 0,
+                       1 · 1 = 1, 1 · 0 = 0, 0 · 0 = 0,
+                       1 = 0, 0 = 1
+
+   The two binary operators are commutative and associative.
+   Examples: x4 is s1 + s8 ; the condition for the robot moving north is
+   x1 x2 x3 x4 + x4 x1 .
+
+
+
+      (HKUST)               Lecture 2: Reactive Agents                 20 / 36
+Production Systems
+One convenient representation for an action function is production
+systems.
+     A production system is a sequence of productions, which are rules of
+     the form:
+                                    c →a
+    meaning if condition c is true, then do a. Here a could be a primitive
+    action, a call to a procedure, or a set of actions to be executed
+    simultaneously.
+    When there are more than one productions can be fired (their
+    condition parts are true), then the first one is applied.
+    The following is a production system representation of the action
+    function for our boundary-following robot:
+                        x4 x1 → north,                    x3 x4 → west,
+                        x2 x3 → south,                    x1 x2 → east,
+                        1 → north.
+        (HKUST)              Lecture 2: Reactive Agents                   21 / 36
+Here is a production system for getting the robot to a corner:
+
+                          inCorner          → nil,
+                                      1 → bf ,
+
+where inCorner is a feature of the sensory input corresponding to
+detecting a corner, nil is the do-nothing action, and bf is the action
+that the above boundary-folliwng production system will produce.
+
+
+
+
+   (HKUST)               Lecture 2: Reactive Agents                 22 / 36
+Learning action functions with genetic
+programming
+
+
+
+
+     (HKUST)       Lecture 2: Reactive Agents   23 / 36
+Machine Evolution
+
+
+
+   Human becomes what we are now through millions of years evolution
+   from apes.
+   Presumably, we could simulate this evolution process to evolve smart
+   machines as well.
+   Evolution has two key components:
+     ▶    reproduction (how do parents produce descendants); and
+     ▶    survival of the fittest (how to select which of these descendants are
+          going to reproduce more descendants).
+
+
+
+
+         (HKUST)                Lecture 2: Reactive Agents                        24 / 36
+Genetic Programming (GP)
+
+   GP is about evolving programs to solve specific problems.
+   The first issue is what the representation is for programs: the
+   techniques for evolving C programs would be different from that for
+   ML programs. The general idea is:
+     ▶ decide what the legal programs are;
+     ▶ define a fitness function;
+     ▶ select a set of legal programs as generation 0;
+
+     ▶ produce the next generation until a desired program is produced.
+
+   Three common techniques for producing the next generations are:
+     ▶ copy (clone a good gene to the next generation);
+     ▶ crossover (mix-up two parent’s genes);
+     ▶ mutation (mutate a gene)
+
+
+   I will illustrate the idea using the boundary-following robot.
+
+
+         (HKUST)            Lecture 2: Reactive Agents                    25 / 36
+The Task
+
+Wall-following in the following grid-world (we have to fix the environment):
+
+
+
+       nw n ne
+        w          e
+       sw s se
+
+
+
+
+© 1998 Morgan Kaufman Publishers
+
+
+
+
+            (HKUST)                Lecture 2: Reactive Agents            26 / 36
+Program Representation
+
+
+We shall assume that the program that we are looking for can be
+constructed from the primitives ones (east, west, etc) by Boolean ops and
+conditionals. The example in the following slide represent a program that
+does the same thing as the following production system:
+
+                         (n + ne)e → east,
+                          (e + se)s → south,
+                        (s + sw )w        → west,
+                                    1 → north.
+
+
+
+
+        (HKUST)             Lecture 2: Reactive Agents                27 / 36
+                                       IF
+
+
+
+              AND         east                                   IF
+
+
+
+        OR          NOT                     AND     south                                IF
+
+
+
+  n           ne            e          OR         NOT                 AND         west
+
+
+                                   e        se          s        OR         NOT               north
+
+
+                                                            s         sw           w
+
+(IF (AND (OR (n) (ne)) (NOT (e)))
+    (east)
+    (IF (AND (OR (e) (se)) (NOT (s)))
+        (south)
+        (IF (AND (OR (s) (sw)) (NOT (w)))
+        (west)
+        (north))))
+© 1998 Morgan Kaufman Publishers
+                (HKUST)                             Lecture 2: Reactive Agents                        28 / 36
+Fitness Function
+
+
+
+    Given a program, and a starting position for the robot, we run it until
+    it has carried out 60 steps, and then count the number of cells next
+    to the wall that are visited during these 60 steps. (Max=32, Min=0.)
+    For a given program, we do ten of these runs with the robot starting
+    at ten randomly chosen starting positions. The total count of the
+    next-to-the-wall cels visited is taken as the fitness of the program.
+    (Max = 320, Min=0.)
+
+
+
+
+       (HKUST)               Lecture 2: Reactive Agents                 29 / 36
+The GP Process
+Generation 0: 5000 random programs.
+Procedure for producing generation (n+1) from generation n:
+    Copy 10% of the programs from generation n to generation n+1.
+    These programs are chosen by the following tournament selection
+    process: 7 programs are randomly selected from the population, and
+    the most fit of these seven is chosen.
+    The rest (90%) are produced from generation n by a crossover
+    operation as follows: a mother and a father is chosen from generation
+    n by the tournament selection process, and a randomly chosen
+    subtree of the father is used to replace a randomly selected subtree of
+    the mother. See next page for an example.
+    Sometimes a mutation operator is also used: it selects a member
+    from generation n by the tournament selection process, and then a
+    randomly chosen subtree of it is deleted and replaced by a random
+    tree. When used, the mutation operation is used sparingly (maybe
+    1% rate).
+        (HKUST)              Lecture 2: Reactive Agents                 30 / 36
+An Example of Crossover Operation
+
+
+               NOT                                                                                     NOT
+
+
+
+         AND
+                           Randomly chosen                     IF                                AND
+                           crossover points
+
+
+   se           IF                               AND                OR      se              se         IF
+
+
+
+  NOT            s           OR             se         NOT          e       nw          NOT            s          AND
+
+
+
+  west                 w           south               north                            west                 se         NOT
+
+
+
+                                                                                                                        north
+
+Mother program                             Father program                             Child program
+© 1998 Morgan Kaufman Publishers
+
+
+
+
+                     (HKUST)                                   Lecture 2: Reactive Agents                                       31 / 36
+Performance of GP
+The performance of GP depends on:
+                the size of generation 0;
+                the copy rate, crossover rate, and mutation rate;
+                the parameters used in the tournament selection process.
+For the wall-following example, it will generate a perfect one after about
+10 generations:
+          350
+          300
+          250
+          200
+Fitness   150
+          100
+           50
+            0
+                0   1   2     3    4   5   6   7   8   9 10
+                              Generation number
+© 1998 Morgan Kaufman Publishers
+
+
+                    (HKUST)                             Lecture 2: Reactive Agents   32 / 36
+Writing action functions by LLMs - class discussion
+
+
+
+
+      (HKUST)         Lecture 2: Reactive Agents      33 / 36
+Sensor Impaired Robots - Memories and States
+
+
+
+
+Consider again our boundary-following robot, assume now that it’s
+somewhat sensory-impaired: its sensory inputs are only (s2 , s4 , s6 , s8 ).
+Can you design an agent for following a bounday based only on these four
+sensors?
+
+
+
+
+        (HKUST)               Lecture 2: Reactive Agents                 34 / 36
+Let w1 − w8 be the features defined as:
+    wi = si when i = 2, 4, 6, 8;
+    w1 = 1 iff at the previous time step, w2 = 1, and the robot moved
+    east;
+    w3 = 1 iff at the previous time step, w4 = 1, and the robot moved
+    south;
+    w5 = 1 iff at the previous time step, w6 = 1, and the robot moved
+    west;
+    w7 = 1 iff at the previous time step, w8 = 1, and the robot moved
+    north.
+Using these features, the following production system will do the job:
+                  w2 w 4 → east,                w4 w 6 → south,
+                  w6 w 8 → west,                w8 w 2 → north,
+                    w1 → north,                 w3 → east,
+                    w5 → south,                 w7 → west,
+                      1 → north
+        (HKUST)              Lecture 2: Reactive Agents                  35 / 36
+Food for Thoughts
+
+
+
+
+Are we agents? Are LLMs agents?
+
+
+
+
+       (HKUST)            Lecture 2: Reactive Agents   36 / 36
+

@@ -1,0 +1,1 @@
+"""EduMind backend application package."""

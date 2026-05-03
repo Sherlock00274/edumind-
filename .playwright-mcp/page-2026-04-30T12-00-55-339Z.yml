@@ -1,0 +1,29 @@
+- generic [ref=e352]:
+  - generic [ref=e353]:
+    - button [ref=e354]:
+      - img [ref=e355]
+    - generic [ref=e363]: 2 / 3
+  - generic [ref=e404]:
+    - generic:
+      - generic: UNSURE
+    - generic:
+      - generic: MASTERED
+    - generic [ref=e405]:
+      - generic [ref=e406]:
+        - generic [ref=e407]: Heuristics
+        - img [ref=e409]
+      - heading "Admissible Heuristic" [level=2] [ref=e415]
+      - generic [ref=e418]: Tap card to reveal
+    - generic [ref=e419]:
+      - heading "可采纳启发式" [level=3] [ref=e422]
+      - paragraph [ref=e424]: An admissible heuristic never overestimates the true cost to reach the goal. It is optimistic and guarantees that A* search finds the optimal solution.
+      - generic [ref=e425]:
+        - generic [ref=e426]:
+          - img [ref=e427]
+          - text: paragraph 2
+        - button "FULL DOC" [ref=e430]:
+          - text: FULL DOC
+          - img [ref=e431]
+  - generic [ref=e435]:
+    - generic [ref=e436]: ← Swipe Left to Master
+    - generic [ref=e437]: Swipe Right to Mark Unsure →

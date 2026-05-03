@@ -1,0 +1,206 @@
+                   CSIT5900 2025-26 Spring Semester Assignment #3
+
+Date assigned: April 25, 2026
+Due time: 11:59PM on May 5, 2026
+How to submit it: Submit the written part a pdf file, and the programming part as a zip
+archive on canvas.ust.hk
+Penalties on late papers: 20% off each day (anytime after the due time is considered
+late by one day)
+
+
+
+
+1     The Written Part
+
+Problem 1 (10 pts) Given the following:
+
+       If the unicorn is mythical, then it is immortal, but if it is not mythical, then it
+       is a mortal mammal. If the unicorn is either immortal or a mammal, then it is
+       horned. The unicorn is magical if it is horned.
+
+Answer the following queries: Is the unicorn mythical? Is it magical? Is it horned? For
+yes answers, please give a proof by refutation using resolution. For no answers, give an
+assignment that satisfies the given facts but not the given query.
+Problem 2 (10 pts) Represent the following sentences in first-order logic, using a consis-
+tent vocabulary (which you must define):
+
+    a. Not all students take both the History and the Biology classes.
+
+    b. Only one student failed the History class.
+
+    c. A person who dislikes all vegetarians is not smart.
+
+    d. Ted dislikes people who dislike vegetarians.
+
+    e. There is a student who does homework for those and only those who do not do
+       homework for themselves.
+
+
+
+
+                                               1
+Problem 3 (10 pts) Consider a company in Hong Kong that decides whether to hire
+someone based on the following features:
+
+   • UST: true if the applicant graduated from HKUST.
+
+   • HKU: true if the applicant graduated from HKU.
+
+   • CU: true if the applicant graduated from CU.
+
+   • GPA: true if the applicant received good grades in school.
+
+   • REC: true if the applicant got good recommendation letters.
+
+   • EXP: true if the applicant had prior experience in related jobs.
+
+Suppose that you’re hired by the company to develop a system that will help the compnay
+to decide whom to hire, and are given the following examples from the company’s hiring
+record:
+
+                Example                    Attributes                    Hire?
+                            GPA    UST     HKU CU        REC     EXP
+                        1    1      0       1      0      1       1        1
+                        2    1      1       0      0      0       0        0
+                        3    1      0       1      0      1       1        1
+                        4    1      1       0      0      1       0        1
+                        5    1      0       0      1      1       1        1
+                        6    1      0       0      1      1       0        0
+                        7    1      0       1      0      1       0        0
+                        8    0      1       0      0      0       1        0
+                        9    0      0       1      0      0       0        0
+                       10    0      0       0      1      1       0        0
+                       11    0      0       0      1      1       0        0
+
+Use GSCA to learn a set of rules from these examples about when to hire an applicant
+based on the values of the given attributes.
+Problem 4 (10 pts) (Russell and Norvig) The following payoff matrix shows a game
+between politicians and the Federal Reserve in the US:
+
+                               Fed: contract   Fed: do nothing     Fed: expand
+              Pol: contract         1,7              4,9                6,6
+                Pol: idle           2,8              5,5                9,4
+              Pol: expand           3,3              7,2                8,1
+
+The politicians can expand (increase spending) or contract (cut spending) fiscal policy (or
+stay idle), while the Fed can expand (lower interest rate) or contract (increase interest rate)
+monetary policy (or do nothing). Find the Nash equilibria of this game.
+
+                                               2
+problem 5 (10 pts). Consider an auction by first price with two agents, with ties broken
+randomly. It’s a common knowledge that both agents have value 6 for the item, and they
+bid only positive integers up to their value. Formulate this auction as a game and find all
+Nash equilibria if there is any.
+Problem 6. (10%) Perform minimax with perfect decision on the tree given in the
+following figure (the leaves are terminal nodes, and the numbers next to them are their
+utility values).
+
+
+
+                                               A
+                                                                                       MAX
+
+                               B                                   C                   MIN
+
+                       D                   E   F           G                       H
+                           3           5                                       4
+
+                                           I       J       K               L
+                                                       5       7       8
+
+                                   M                   N
+                                       0           7
+
+
+                               Figure 1: A minimax search tree
+
+
+Problem 7. (10%) Perform a left-to-right alpha-beta prune on the tree in the above
+exercise. Perform a right-to-left prune on the same tree. Left-to-right or right-to-left means
+the order by which the leaf nodes are generated. So for left-to-right, the first leaf node
+considered is D, followed by E, followed by M and so on.
+
+
+2    The Programming Part
+
+The following two programming questions are exercises for you to use a mechanical theorem
+prover to solve problems by reasoning or finding models. The theorem prover you need to
+use is Z3. The official release is here:
+https://github.com/Z3Prover/z3
+If you use unix, you can install it using pip:
+https://pypi.org/project/z3-solver/#description
+Here is a good description of how to install it by Bob Moore of UT Austin:
+http://www.cs.utexas.edu/users/moore/acl2/manuals/current/manual/index-seo.php/
+SMT____Z3-INSTALLATION
+Problem 8: Lady or Tiger (15 pts) There are three rooms. Each contains either a
+lady or a tiger but not both. Furthermore, one room contained a lady and the other two
+contained tigers. Each of the rooms has a sign, and at most one of the three signs was true.
+
+                                                           3
+The three signs are:
+
+   • Room I: A TIGER IS IN THIS ROOM.
+   • Room II: A LADY IS IN THIS ROOM.
+   • Room III: A TIGER IS IN ROOM II.
+
+Which room contains the lady?
+Problem 9: The Ranking Problem (15 pts) Given the following facts:
+
+  1. Lisa is not next to Bob in the ranking
+  2. Jim is ranked immediately ahead of a biology major
+  3. Bob is ranked immediately ahead of Jim
+  4. One of the women (Lisa and Mary) is a biology major
+  5. One of the women is ranked first
+
+What are possible rankings for the four people?
+
+
+What to submit
+
+For the programming part, you must submit a zip file named as YourStudentID.zip, which
+includes:
+
+   • for Problem 1: lady.py, which is a z3 query file for your answer. For example, if
+     your answer is that the lady is in room 2, and you use l2 to denote it, then your z3
+     query file is to check whether not(l2) is consistent with the KB of this problem. For
+     example, the following python code is a z3 query file to check if q follows from p and
+     p ⊃ q:
+
+     ---------------------------------------------------------------
+     from z3 import *
+
+     p = Bool(’p’)
+     q = Bool(’q’)
+     s = Solver()
+     s.add(Implies(p,q))
+     s.add(p)
+     # to prove q, add not(q) to see if it causes a contradiction
+     # change not(q) to Not(q) if the following does not work on your installation
+     s.add(not(q))
+     print(s.check())
+     ---------------------------------------------------------------
+
+                                              4
+• for Problem 2: ranking.py, which is your z3 query file to find a model from which to
+  read out a ranking. For example, the following is a python code to compute a model
+  of p ∨ q and ¬(p ∧ q):
+
+  ---------------------------------------------------------------
+  from z3 import *
+
+  p = Bool(’p’)
+  q = Bool(’q’)
+  s = Solver()
+  s.add(or(p,q))
+  s.add(not(and(p,q)))
+  print(s.check())
+  print(s.model())
+  ---------------------------------------------------------------
+  Again some installations require operators to be capitalized. In this case,
+  use Not(), Or(), And().
+
+
+
+
+                                        5
+

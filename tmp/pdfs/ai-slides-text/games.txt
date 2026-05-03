@@ -1,0 +1,1178 @@
+               CSIT5900
+Game Theory, Game Tree Search, and Auction
+
+
+          Department of Computer Science and Engineering
+          Hong Kong University of Science and Technology
+
+
+
+
+(HKUST)                     Game Theory                    1 / 59
+Multi-Agent Systems (MASs)
+
+
+
+   An MAS is one where more than one agent co-exist and interact.
+   In addition to issues that need to be dealt with in single agent case
+   (such as checking if a newly observed/told fact is consistent with his
+   current belief set), new issues in MASs include the following:
+     I How do agents communicate with each other.
+     I How do they cooperate with each other.
+     I How do they act in face of adversity.
+
+
+
+
+         (HKUST)                Game Theory                             2 / 59
+Examples
+
+
+   Two person adversary games such as chess, go, and tic-tac-toe:
+     I What’s my opponent like?
+     I How much time do I have for each move?
+     I Why am I playing the game?
+
+
+   Two teams compete against each other including bridge and most
+   sport games.
+   Resource allocations: a number of agents need to share certain
+   resources, what’s a fair way of dividing the resources?
+   Market mechanisms in a society.
+
+
+
+
+         (HKUST)               Game Theory                          3 / 59
+Game Theory
+
+
+
+
+   Game theory studies how self-interested agents interact.
+   It has been applied in economics, political science, social science,
+   biology, computer science, and many other areas.
+   Games in normal form are the simplest games studied in game theory
+   and also most fundamental ones.
+
+
+
+
+      (HKUST)                   Game Theory                               4 / 59
+Game Theory (Definitions)
+Wikipedia:
+     Game theory is a branch of applied mathematics that is used in the social sciences,
+     most notably in economics, as well as in biology, engineering, political science, in-
+     ternational relations, computer science, and philosophy. Game theory attempts to
+     mathematically capture behavior in strategic situations, in which an individual’s suc-
+     cess in making choices depends on the choices of others. While initially developed to
+     analyze competitions in which one individual does better at another’s expense (zero
+     sum games), it has been expanded to treat a wide class of interactions, which are
+     classified according to several criteria. Today, “game theory is a sort of umbrella
+     or ’unified field’ theory for the rational side of social science, where ’social’ is inter-
+     preted broadly, to include human as well as non-human players (computers, animals,
+     plants)” (Aumann 1987).
+Stanford Encyclopedia of Philosophy:
+      Game theory is the study of the ways in which strategic interactions among rational
+      players produce outcomes with respect to the preferences (or utilities) of those players,
+      none of which might have been intended by any of them. The meaning of this
+      statement will not be clear to the non-expert until each of the italicized words and
+      phrases has been explained and featured in some examples.
+
+
+
+
+           (HKUST)                           Game Theory                                           5 / 59
+An Example
+
+You and your friend share a network and both of you want to download a
+movie:
+    If both of you do that, the network is jammed, and none of you is
+    happy: say both of you value it 2.
+    If only one of you do that, the network works perfectly: the one who
+    did that is very happy (score of 5), the other is very unhappy (0).
+    If none of you do that, then none of you is very happy, but then you
+    can do something together. So let’s assign it a score of 3.
+What should you do? Does it depend on what you think your friend will
+do? Does it depend on if you two can talk about it? Will most rational
+people choose to do the same thing? What if the same situations need to
+be repeated a number of times?
+These are some of the problems studied in game theory.
+
+
+        (HKUST)                 Game Theory                             6 / 59
+Modeling Agents’ Interests
+
+
+
+       Preferences: prefer A over B.
+       Utility functions: A has value 100 and B 60 to me.
+A utility function is a function from outcomes (situations) to real numbers between [0, 1].
+
+Theorem (von Neumann and Morgenstern, 1944) If a preference relation  satisfies the
+axioms completeness, transitivity, substitutability, decomposability, monotonicity, and continuity,
+then there exists a function u: O → [0, 1] with the properties:
+   1   u(o1 ) ≥ u(o2 ) iff o1  o2 , and
+       u([p1 : o1 , ...pk : ok ]) = ki=1 pi u(oi ), where [p1 : o1 , ..., pk : ok ] is a lottery (assigning
+                                   P
+   2
+       probability pi to outcome oi ) on O.
+
+
+
+
+            (HKUST)                              Game Theory                                                  7 / 59
+Games in Normal Form
+
+
+
+A (finite, n-person) game is a tuple (N, A, u), where
+    N is a set of players, indexed by i;
+    A = (A1 , ..., An ), and each Ai is a set of actions (pure strategies) for
+    agent i;
+    u = (u1 , ..., un ), and each ui is a utility function for agent i, which is
+    a function from A to numbers.
+
+
+
+
+        (HKUST)                    Game Theory                                 8 / 59
+Prisoner’s Dilemma
+
+
+   Two prisoners are interrogated separately.
+   If both denies (cooperate), then each gets 1 year;
+   If both admit (defect), then each serves 2 years;
+   If one admits and the other denies, then the one who denies gets 3
+   years and the one who admits is free.
+
+                                  C        D
+                            C    3, 3     0,5
+                            D    5, 0     1, 1
+
+
+
+
+      (HKUST)                   Game Theory                             9 / 59
+Coordination Games
+
+
+
+   We can choose to drive either on the left or the right side of the road.
+   Safe if we choose the same.
+   Collision if we choose differently.
+
+                                   L         R
+                            L     1, 1     -1,-1
+                            R    -1, -1     1, 1
+
+
+
+
+      (HKUST)                    Game Theory                            10 / 59
+Battle of Sexes
+
+
+    A man and a woman are sharing a TV.
+    There are two channels, sport and movie.
+    The man prefers to watch the sport channel.
+    The woman prefers to watch the movie channel.
+
+                                 S             M
+                           S    1, 0         -1,-1
+                           M   -1, -1         0, 1
+
+
+
+
+       (HKUST)                 Game Theory           11 / 59
+The Matching Pennies Game
+
+
+
+   We each flips a coin at the same time.
+   I win if they match, and lose if they don’t.
+
+                                  H        T
+                            H   1, -1     -1,1
+                            T   -1, 1     1, -1
+
+
+
+
+      (HKUST)                   Game Theory       12 / 59
+Solution Concepts: Nash Equilibria
+
+
+
+    Given a profile s = (a1 , ..., an ), and a player i, we write
+    si = (a1 , ..., ai−1 , ai+1 , ..., an ), and s = (si , ai ).
+    A strategy a∗ ∈ Ai is player i’s best response to si if for any a ∈ Ai ,
+    ui (si , a) ≤ ui (si , a∗ ).
+    A profile s = (a1 , ..., an ) is a Nash equilibrium if for each player i, ai is
+    player i’s best response to si .
+    Given a game, there may be one, more than one, or no Nash
+    equilibria.
+
+
+
+
+        (HKUST)                     Game Theory                                13 / 59
+Mixed Strategies
+
+
+       P strategy of an agent is a lottery of her actions π : A → [0, 1]
+    A mixed
+    and a π(a) = 1.
+    The utility function can be extended to mixed strategies:
+
+                                           X                                 n
+                                                                             Y
+                 ui (π1 , ..., πn ) =                   ui (a1 , ..., an )         πk (ak )
+                                        (a1 ,...,an )                        k=1
+
+    A mixed strategy profile is a (mixed) NE if no one can deviate for
+    better by another mixed strategy.
+Nash Theorem Every game has a mixed NE.
+
+
+
+
+       (HKUST)                            Game Theory                                         14 / 59
+Zero-Sum games (Strictly Competitive Games)
+
+A two-person game (A, B, u1 , u2 ) is a zero-sum (or strictly competitive
+game) if for all a ∈ A, b ∈ B, u1 (a, b) + u2 (a, b) = 0.
+In a zero-sum game, what is good for one player is bad for the other. A
+zero-sum game has a unique Nash equilibria payoff: if (a1 , b1 ) and (a2 , b2 )
+are both Nash equilibria, then ui (a1 , b1 ) = ui (a2 , b2 ), i = 1, 2.
+In fact, if (a, b) is a Nash equilibrium, then
+
+                     miny ∈B u1 (a, y ) ≥ miny ∈B u1 (x, y )
+
+for any x ∈ A, and similarly for any y ∈ B,
+
+                     minx∈A u2 (x, b) ≥ minx∈A u2 (x, y )
+
+
+
+
+        (HKUST)                    Game Theory                              15 / 59
+A Zero-Sum Game
+
+
+
+Tic-Tac-Toe:
+    A board with nine squares.
+    Two players: “X” and “O”; “X” moves first, and then alternate.
+    At each step, the player choose an unoccupied square, and mark it
+    with his/her name. Whoever gets three in a line wins.
+How do we formulate this as a game in normal form and show that it is a
+zero-sum game? Is this how we play this game?
+
+
+
+
+        (HKUST)                  Game Theory                            16 / 59
+Games as Search Problems
+   Assume a two-player games (the notion of “players” is generic), with
+   a decision making player treating the other agent as its opponent.
+   Two sources of uncertainty:
+     I Opponent: The agent does not know in advance what action its
+       opponent will take.
+     I Time-bounded search: Time limit has to be imposed because searching
+
+       for optimal decisions in large state spaces may not be practical. The
+       “best” decisions found may be suboptimal.
+   Search problem:
+     I Initial state: initial board configuration and indication of who makes
+       the first move.
+     I Operators: legal moves.
+     I Terminal test: determines when a terminal state is reached.
+     I Utility function (payoff function): returns a numeric score to quantify
+
+       the outcome of a game.
+
+
+         (HKUST)                  Game Theory                               17 / 59
+Game Tree for Tic-Tac-Toe
+
+
+MAX (X)
+
+
+
+
+           X             X                   X
+MIN (O)                                          X         X         X
+                                                                         X   X   X
+
+
+           X O       X         O   X                 ...
+MAX (X)                            O
+
+
+
+
+           X O X     X O           X O               ...
+MIN (O)              X               X
+
+
+
+
+               ...       ...           ...           ...
+
+
+
+           X O X     X O X         X O X             ...
+TERMINAL     O X     O O X           X
+             O       X X O         X O O
+Utility        −1        0             +1
+
+
+
+
+               (HKUST)                                         Game Theory           18 / 59
+Minimax Algorithm With Perfect Decisions
+
+
+Minimax Algorithm (With Perfect Decisions) Assume the two players are:
+MAX (self) and MIN (opponent). To evaluate a node n in a game tree:
+  1   Expand the entire tree below n.
+  2   Evaluate the terminal nodes using the given utility function.
+  3   Select a node that has not been evaluated yet, and all of its children
+      have been evaulated. If there are no such node, then return.
+  4   If the selected node is on at which the MIN moves, assign it the
+      minimum of the values of its children. If the selected node is on at
+      which the MAX moves, assign it the maximum of the values of its
+      children. Return to step 3.
+
+
+
+
+         (HKUST)                   Game Theory                               19 / 59
+MAX tries to maximize the utility, assuming that MIN will act to minimize
+it.
+
+
+MAX                                                 3
+
+                           A1              A2                A3
+
+MIN                    3                            2                     2
+
+
+      A 11     A 12    A 13         A 21   A 22 A 23          A 31   A 32     A 33
+
+
+
+       3          12            8     2         4       6       14            5      2
+
+
+
+
+             (HKUST)                                        Game Theory                  20 / 59
+Imperfect Decisions
+
+
+    Minimax algorithm with perfect decisions:
+      I    No time limit is imposed.
+      I    The complete search tree is generated.
+    It is often impractical to make perfect decisions, as the time and/or
+    space requirements for complete game tree search (to terminal states)
+    are intractable.
+    Two modifications to minimax algorithm with perfect decisions:
+      I Partial tree search:
+        Terminal test is replaced by a cutoff test.
+      I Evaluation function:
+
+        Utility function is replaced by a heuristic evaluation function.
+
+
+
+
+          (HKUST)                   Game Theory                            21 / 59
+Minimax Algorithm (With Imperfect Decisions) Assume the two players
+are: MAX (self) and MIN (opponent). To evaluate a node n in a game
+tree:
+  1   Expand the tree below n according to the partial tree search.
+  2   Evaluate the leaf nodes using the given evaluation function.
+  3   Select a node that has not been evaluated yet, and all of its children
+      have been evaulated. If there are no such node, then return.
+  4   If the selected node is on at which the MIN moves, assign it the
+      minimum of the values of its children. If the selected node is on at
+      which the MAX moves, assign it the maximum of the values of its
+      children. Return to step 3.
+
+
+
+
+         (HKUST)                   Game Theory                               22 / 59
+Evaluation Functions
+   An evaluation function returns an estimate of the expected utility of
+   the game from a given position.
+   Requirements:
+     I Computation of evaluation function values is efficient.
+     I Evaluation function agrees with utility function on terminal states.
+     I Evaluation function accurately reflects the chances of winning.
+
+
+   Most game-playing programs use a weighted linear function:
+
+                            w1 f1 + w2 f2 + · · · wn fn
+
+   where the f ’s are the features (e.g. number of queens in chess) of the
+   game position, and w ’s are the weights that measure the importance
+   of the corresponding features.
+   Learning good evaluation functions automatically from past
+   experience is a promising new direction.
+
+         (HKUST)                  Game Theory                                 23 / 59
+Tic-Tac-Toe
+
+
+Evauation function, e(p), for Tic-Tac-Toe
+    If p is not a winning position for either player, then e(p) = (the
+    number of complete rows, columns, or diagonals that are still open for
+    MAX) - (the number of complete rows, columns, or diagonals that
+    are still open for MIN).
+    If p is a win for MAX, then e(p) = ∞; if p is a win for MIN, then
+    e(p) = −∞.
+The next three slides illustrate Minimax search with imperfect decisions.
+Notice that we have eliminated symmetric positions.
+
+
+
+
+        (HKUST)                  Game Theory                            24 / 59
+The First Stage of Search
+                     1
+                               OX          6–4=2
+                     X
+
+                                   X       5–4=1
+                               O                            O   4 – 6 = –2
+                                                            X
+  MAX’s move
+                                                            O
+                                                                6–6=0
+      1                   –2                                X
+
+                                                        O
+                                                                5 – 6 = –1
+                          X                                 X
+
+Start node
+                                                        O       5–5=0
+                                                            X
+
+
+                                                                5 – 6 = –1
+                                                        OX
+
+                                   O       4 – 5 = –1
+                               X
+
+                                       O
+                                           5–5=0
+                     –1        X
+
+                                       O
+                                           6–5=1
+                 X             X
+
+
+                                           5–5=0
+                               X       O
+
+
+                                           6–5=1
+                               X O
+             (HKUST)                                    Game Theory          25 / 59
+The Second Stage of Search
+
+  1                                                                                     0
+       Start node
+OX                                                                                     OX X   OX X 3–3=0
+                                                                                                 O
+                                    MAX’s move
+                                                                                              OX X   4–3=1
+                                                              1                                O
+                                                                      O
+                                                             OX       OX       4–2=2          OX X   4–3=1
+                                                                  X        X                  O
+                                                                       O
+                                                                      OX       4–2=2
+                                    0                                      X
+                                           O                               O
+                                   OX      OX        4–3=1            OX       3–2=1
+                                    X        X                             X
+                                            O
+                                           OX        4–3=1            OX O 5–2=3
+  1                                         X                            X
+               O                                 O
+OX             OX        3–2=1             OX        3–3=0            OX       4–2=2
+X              X                            X                          OX
+                 O
+               OX        4–2=2             OX O 5–3=2                 OX       4–2=2
+               X                            X                         O X
+                     O
+               OX        3–2=1             OX   3–3=0
+               X                            X O
+
+               OX O 5–2=3                  OX        4–3=1
+               X                           OX
+
+               OX   3–2=1
+               X  O
+
+               OX        4–2=2
+               X O
+
+© 1998 Morgan Kaufman Publishers
+
+
+
+
+                         (HKUST)                                               Game Theory                   26 / 59
+The Last Stage of Search
+                             OX O                          OOX
+                             OX   2–1=1                    OX     3–1=2
+                                X                             X
+                             OX                            O X
+                             OX O 2–1=1                    OX O 3–1=2
+                                X                             X
+      –∞                     OX             –∞             O X
+      OX
+                             OX     2–1=1   O X
+                                                           OX     2–1=1
+                              OX                            OX
+      OX                                    OX
+              X              OX                X           O X
+                             OX     –∞                     OX     – ∞
+                             O X                           O X
+
+
+                                                                            OO
+                                                                            OX X   3–2=1
+                                                                               X
+  1                                                 –∞                      O O
+                                                                            OX X 2–2=0
+O                                                   O                          X
+OX                                                  OX X
+      X                                                X                    O
+Start
+                                                                            OX X   2–2=0
+                                                                               X
+node                                                                        O
+              MAX’s                                                         OX X   –∞
+              move                                                          O X
+
+          1                  OO             –∞               OO
+
+      O
+                             OX     3–1=2   O
+                                                         D OX          3–2=1
+                             X  X                                X X
+      OX                                    OX
+      X  X                   O O              X X            O O
+                             OX   2–1=1                  C   OX   2–2=0
+                             X  X                             X X
+                             O                               O
+                             OX O 3–1=2                  B OX O 3–2=1
+                             X  X                                X X
+                             O                               O
+                             OX     2–1=1                A OX          –∞
+                             X OX                            OX X
+
+© 1998 Morgan Kaufman Publishers
+
+
+                      (HKUST)                         Game Theory                          27 / 59
+Partial Tree Search
+
+
+    Different approaches:
+      I Depth-limited search
+      I Iterative deepening search
+      I Quiescent search
+
+
+    Quiescent positions are positions that are not likely to have large
+    variations in evaluation in the near future.
+    Quiescent search:
+      I    Expansion of nonquiescent positions until quiescent positions are
+           reached.
+
+
+
+
+          (HKUST)                    Game Theory                               28 / 59
+Pruning
+
+         Pruning: The process of eliminating a branch of the search tree from
+         consideration without actually examining it.
+         General idea: If m is better than n for Player, then n will never be
+         reached in actual play and hence can be pruned away.
+
+Player
+
+
+
+Opponent       m
+
+..
+..
+..
+
+Player
+
+
+Opponent                 n
+
+
+
+
+            (HKUST)                   Game Theory                               29 / 59
+Alpha-Beta Pruning
+   Minimax search without pruning:
+
+   MAX                                               3
+
+                            A1              A2                 A3
+
+   MIN                  3                            2                   2
+
+
+         A 11   A 12    A 13         A 21   A 22 A 23          A 31   A 32   A 33
+
+
+
+          3        12            8     2         4         6     14          5        2
+
+
+
+   Minimax search with alpha-beta pruning:
+
+   MAX                                               3
+
+                            A1              A2                 A3
+
+   MIN                  3                            <=2                 2
+
+
+         A 11   A 12    A 13         A 21   A 22 A 23          A 31   A 32   A 33
+
+
+
+          3        12            8     2                         14          5        2
+
+
+
+   Effectiveness of alpha-beta pruning depends on the order in which
+   successor nodes are examined.
+         (HKUST)                                                                    Game Theory   30 / 59
+Alpha-Beta Search Algorithm - Informal Description
+To evaluate a MAX node in a game tree (we shall call the value assigned
+to a MAX node its alpha value, and that to a MIN node its beta value):
+  1   Expand the node depth-first until a node that satisfies the cutoff test
+      is reached.
+  2   Evaluate the cutoff node.
+  3   Update the values of all the nodes that have so far been expanded
+      according to Minimax algorithm, and using the following pruning
+      strategy:
+        I prune all children of any MIN node whose beta value is ≤ the alpha
+          value of any of its MAX ancestors.
+        I prune all children of any MAX node whose alpha value is ≥ the beta
+
+          value of any of its MIN ancestors.
+  4   Backtrack to a node that has not been pruned, and go back to step
+      1. If there are no such node to backtrack to, then return with the
+      value assigned to the original node.
+
+            (HKUST)                Game Theory                             31 / 59
+Example
+Part of the first state of search in Tic-Tac-Toe using Alpha-Beta search.
+                         Beta value = –1
+                                                             5 – 6 = –1
+                                            C    OX
+                               B       X
+
+Alpha value = –1
+                                                     O       4 – 5 = –1
+                                                 X
+           Start node                  –1                O
+                               A                             5–5=0
+                                                 X
+
+                                   X
+                                                         O 6–5=1
+                                                 X
+
+
+                                                             5–5=0
+                                                 X       O
+
+
+                                                             6–5=1
+                                                 X O
+
+© 1998 Morgan Kaufman Publishers
+
+
+
+              (HKUST)                       Game Theory                   32 / 59
+Alpha-Beta Search Algorithm
+The above informal description corresponds to calling the following
+function
+ MAX-VALUE(node,game,-∞,∞):
+
+  function MAX-VALUE(state, game, ,  ) returns the minimax value of state
+    inputs: state, current state in game
+            game, game description
+              , the best score for MAX along the path to state
+             , the best score for MIN along the path to state
+    if CUTOFF-TEST(state) then return EVAL(state)
+    for each s in SUCCESSORS(state) do
+            MAX( , MIN-VALUE(s, game, ,  ))
+        if       then return 
+    end
+    return
+
+  function MIN-VALUE(state, game, ,  ) returns the minimax value of state
+
+    if CUTOFF-TEST(state) then return EVAL(state)
+    for each s in SUCCESSORS(state) do
+         MIN(  , MAX-VALUE(s, game, ,  ))
+        if       then return
+    end
+    return 
+
+
+
+
+             (HKUST)                                             Game Theory   33 / 59
+Analyses of Game-Playing Algorithm
+
+
+   The effectiveness of alpha-beta pruning depends on the ordering in
+   which successors are generated.
+   Assuming optimal ordering,√alpha-beta pruning can reduce the
+   branching factor from b to b (Knuth and Moore 1975).
+   The result also assumes that all nodes have the same branching
+   factor, that all paths reach the same fixed depth limit, and that the
+   leaf (cutoff node) evaluations are randomly distributed.
+   All the game-playing algorithms assume that the opponent plays
+   optimally.
+
+
+
+
+      (HKUST)                   Game Theory                             34 / 59
+Monte-Carlo Search
+Pure Monte-Carlo Search:
+    Expand the current node;
+    For each child, play a large number of random games to the finish
+    and compute the average payoffs (values).
+    Play the child move that has the largest average value.
+
+
+
+
+        (HKUST)                 Game Theory                             35 / 59
+Monte-Carlo Tree Search
+
+
+
+Making use of MCS in game playing:
+    Use formulas other than average to summarize the sampling results.
+    Combine it with alpha-beta pruning search: start with alpha-beta
+    pruning and go to Monte-Carlo when the level is too deep to continue
+    or when there is no good evaluation function on the states.
+    Make use of domain knowledge, and combine it with learning
+    techniques.
+
+
+
+
+       (HKUST)                 Game Theory                           36 / 59
+An Example
+
+
+Averages may be misleading: minimax would choose the left branch while
+averaging would lead to the right branch.
+
+
+
+
+        (HKUST)                Game Theory                          37 / 59
+Monte-Carlo Search with UCB
+MCS with UCB (Upper Confidence Bound):
+    Expand the current node v ;
+    For each child Mi , play a large number of random games to the finish
+    and compute its UCB. A common formula is:
+                                             s
+                                                log N
+                          UCB(Mi ) = µi + c
+                                                  Ni
+
+    where
+      I µi is the expected value of the games (tryouts) for the child node Mi .
+        For example, in zero-sum game, it’s W  Ni , where Wi is the number of
+                                                 i
+
+
+        win’s for Mi , and Ni is the total number of plays for Mi ;
+      I N is the total number of plays for v ;
+      I c is a constant called the exploration parameter used to balance
+
+        branches.
+    Play the child move that has the largest average value.
+          (HKUST)                 Game Theory                                38 / 59
+Monte-Carlo Tree Search (MCTS)
+MCTS:
+   Start building the tree using alpha-beta pruning.
+   Continue on with Monte-Carlo search with UCB scoring rule.
+   Propagate the values up the alpha-beta tree.
+
+
+
+
+       (HKUST)                 Game Theory                      39 / 59
+State of Art
+
+
+
+
+    Chess: Deep Blue (Benjamin, Tan, et al.) defeated world chess
+    champion Gary Kasparov on May 11, 1997.
+    Checker: Chinook (Schaeffer et al.) became the world champion in
+    1994.
+    Go: AlphaGo (Silver et al.) defeated a top-level player in 2016.
+
+
+
+
+       (HKUST)                   Game Theory                           40 / 59
+Auctions
+
+The auction setting is important for two reasons.
+    Auctions are widely used in consumer, corporate, and computer
+    science settings: Trade goods; sell important public resources; run
+    financial markets; allocate broadband bandwidth and processing
+    powers.
+    The second and more fundamental reason to care about auctions is
+    that they provide a general theoretical framework for understanding
+    resource allocation problems among self-interested agents: an auction
+    is any protocol that allows agents to indicate their interest in one or
+    more resources, and that uses these indications of interest to
+    determine both an allocation of resources and a set of payments by
+    the agents.
+
+
+
+        (HKUST)                  Game Theory                              41 / 59
+Single-Item Auctions
+
+Examples:
+  1   English auctions: the auctioneer sets a starting price, and agents bid
+      successively.
+  2   Japanese auctions: the auctioneer sets a starting price, and increases
+      the price successively; agents decide whether to be “in” at each price
+      point.
+  3   Dutch auctions: the auctioneer sets a high starting price, and
+      decreases the price successively; the first agent signals a buy signal
+      wins the item at that price.
+  4   Sealed-bid auctions: agents send in bids in secret and the auctioneer
+      uses a protocal to decide the winner. The protocal must be known to
+      the agents before they send in their bids.
+
+
+         (HKUST)                    Game Theory                                42 / 59
+Auctions as Structured Negotiations
+
+
+An auction is a negotiation with the following rules:
+    Bidding rules: How are offers made (by whom, when, what can their
+    content be)?
+    Clearing rules: When do trades occur, or what are those trades (who
+    gets which goods, and what money changes hands) as a function of
+    the bidding?
+    Information rules: Who knows what when about the state of
+    negotiation?
+
+
+
+
+        (HKUST)                   Game Theory                        43 / 59
+Sealed Bid Auctions
+
+
+First Price Auction:
+    Bidders send in their bids sealed.
+    The highest bidder wins the item at the price of her bid.
+    When there is a tie, break it randomly.
+Second Price Auction:
+    Bidders send in their bids sealed.
+    The highest bidder wins the item at the price of the next highest bid.
+    When there is a tie, break it randomly.
+How should agents bid?
+
+
+
+
+        (HKUST)                  Game Theory                           44 / 59
+Auctions as Games
+
+
+
+First price auction with common knowledge of agents’ values:
+    a set of agents N = {1, ..., n};
+    the same set of actions for each agent {x | 0 ≤ x ≤ 1} (bid at x);
+    utility functions ui (x1 , ..., xn ) = vi − xi if agent i wins the auction, and
+    0 otherwise, where vi is the value that the item is worth to agent i.
+Questions: Does it matter how ties are broken? What are the Nash
+equilibria?
+
+
+
+
+        (HKUST)                     Game Theory                                45 / 59
+Auctions as Games
+
+
+Second price auction with common knowledge of agents’ values:
+    a set of agents N = {1, ..., n};
+    the same set of actions for each agent {x | 0 ≤ x ≤ 1} (bid at x);
+    utility functions ui (x1 , ..., xn ) = vi − xj if agent i wins the auction,
+    and 0 otherwise, where vi is the value that the item is worth for agent
+    i, and xj is the second highest value in {x1 , ..., xn }.
+Questions: Does it matter how ties are broken? What are the Nash
+equilibria?
+
+
+
+
+        (HKUST)                   Game Theory                               46 / 59
+First Price Auction with Common Same value
+
+
+
+
+Assumptions:
+    one single item up for auction using the first price mechanism;
+    ties are broken randomly;
+    N bidders, each can bid using prices from a fixed set P;
+    each has value 1 for the item.
+
+
+
+
+       (HKUST)                  Game Theory                           47 / 59
+Case 1
+
+
+Consider N = 2 (two bidders), and P = {0, 1} (each can bid either 0 or
+1). This yields the following game:
+
+                                   0            1
+                            0   0.5, 0.5       0, 0
+                            1     0, 0         0, 0
+
+When both bid 0, they all get expected payoff of 0.5 because the tie is
+broken randomly and the winner gets payoff 1. So two Nash equilibria:
+(0, 0) and (1, 1).
+
+
+
+
+         (HKUST)                 Game Theory                              48 / 59
+Case 1 - A Generalization
+Suppose in general there are two bids 0 ≤ a < b ≤ 1:
+                             a                    b
+                  a   (1-a)/2, (1-a)/2         0, 1-b
+                  b        1-b, 0         (1-b)/2, (1-b)/2
+    (b, b) will always be a Nash equilibrium.
+    (a, a) is a Nash equilibrium iff (1 − a)/2 ≥ 1 − b.
+    (a, b) cannot be a Nash equilibrium: it is a Nash equilibrium iff
+    0 ≥ (1 − b)/2 and 1 − b ≥ (1 − a)/2, i.e. a = b = 1, which is
+    impossible.
+    (b, b) will be the only Nash equilibrium if (1 − a)/2 < 1 − b, i.e.
+    a > 2b − 1.
+    An example of last case: a=0.3, b=0.6. In this case, the game
+    becomes the Prisoner’s dilemma:
+                                      0.3       0.6
+                            0.3 0.35, 0.35 0, 0.4
+                            0.6     0.4, 0    0.2, 0.2
+        (HKUST)                  Game Theory                              49 / 59
+General Case
+In general, suppose there are n ≥ 2 players, and each can bid
+0 ≤ a1 < · · · < am ≤ 1, m ≥ 2.
+     (am , ..., am ) is always a Nash equilibrium;
+     (ai , ..., ai ), 1 ≤ i < m, is a Nash equilibrium iff (1 − ai )/n ≥ 1 − ai+1 ;
+     suppose x = (x1 , ..., xn ) has two different elements, and the largest
+     element is ai which occurs k times.
+       I if k = 1, then x is not a Nash equilibrium: if ai = 1, then the player
+         who bids ai can increase her expected payoff by lowering her bid to
+         ai−1 ; if ai < 1, then players whose bids are lower than ai can increase
+         their expected payoff by raising their bids to ai .
+       I If k > 1, then x is a Nash equilibrium iff a = a
+                                                      i     m = 1.
+
+If each player can bid arbitrarily in a continuous close interval [l, m], then
+the unique Nash equilibrium is (m, ..., m). If the upper bound is open:
+[l, m), then there is no Nash equilibrium.
+
+           (HKUST)                  Game Theory                                50 / 59
+Auctions as Games
+
+
+
+
+   But it is not reasonable to expect agents will know each other’s
+   valuations of the item.
+   What the item is worth to an agent is her own private information.
+   How to model uncertainties: probabilities.
+
+
+
+
+      (HKUST)                  Game Theory                              51 / 59
+Auctions as Bayesian Games
+In general, a sealed single item auction consists of
+     a set of agents N = {1, ..., n};
+     for each agent, a set of possible private values, and a set of possible
+     bids - we assume they are both [0, 1] here;
+     a common joint prior on value profiles: p : [0, 1]n → [0, 1];
+     a payment function σ from bid profiles and agents to [0.1]:
+                                 σ : [0, 1]n × N → [0, 1],
+     meaning that σ(b, i) is what i needs to pay when the bid profile is b;
+     a winner selection function τ from bid profiles to agents.
+A strategy is now a function from agent’s private values to bids. Assuming
+agents are risk-neutral, the utility function for agent i is then
+                                X
+           ui (f1 , ..., fn ) =   p(v )ui (f1 (v1 ), ..., fn (vn ), v1 , ..., vn ),
+                             v
+
+where ui (b, v ) = vi − σ(b, i) if τ (b) = i, and −σ(b, i) otherwise.
+         (HKUST)                      Game Theory                              52 / 59
+Nash Equilibria for Auctions
+
+
+
+
+    For second-price auction, the Nash quilibrium is to bid your valuation:
+    (v1 , ..., vn ).
+    For first-price auction, if each player’s valuation is drawn
+    independently and uniformly at random, then
+    (v1 (n − 1)/n, ..., vn (n − 1)/n) is a Nash equilibria.
+
+
+
+
+       (HKUST)                    Game Theory                           53 / 59
+Revenue Equivalence
+
+
+A landmark result of auction theory is Vickrey’s celebrated revenue
+equivalence theorem: any auction in which
+    the bidder with the highest valuation always wins
+    the bidder with the lowest possible valuation expects zero payoff
+    all bidders are risk neutral, and
+    bidders’ valuations are drawn from a strictly increasing and atomless
+    distribution
+will lead to the same expected revenue for the seller (auctioneer).
+
+
+
+
+        (HKUST)                   Game Theory                           54 / 59
+Iterated Prisoner’s Dilemma
+
+The general form of the prisoner’s dilemma:
+
+                               Cooperate       Defect
+                  Cooperate    R=3, R=3       S=0, T=5
+                   Defect      T=5, S=0       P=1, P=1
+
+Here R is rewards for mutual cooperation, P penalty for mutual defection,
+T the temptation to defect, and S sucker’s payoff.
+    In general, T > R > P > S, and for iterated prisoner’s dilemma:
+    2R > T + S so that cooperate twice is better than taking turns to
+    exploit each other.
+    The game has a dominant Nash equilibrium (D, D), and this is the
+    strategy to play if the players are to play the games for a known
+    number of times.
+
+
+        (HKUST)                 Game Theory                             55 / 59
+Computer Prisoner’s Dilemma Tournament (Axelrod 1984)
+Rules:
+    Each program is going to play another player an unknown number of
+    times, determined by a probability (the probability of ending the
+    match is set to be 0.00346).
+    Each program has available to it the history of interactions so far.
+Round one:
+    14 entries + RANDOM, round robin, each pair of entries was
+    matched in 5 games of 200 moves each. An entry’s score is the sum
+    of its scores in all games it played.
+    The winner was Tit For Tat (TFT) submitted by Anatol Rapoport, a
+    psychologist from University of Toronto.
+    TFT cooperates on the first move and there after plays whatever
+    move the other player played last time.
+Round two: conducted after the results of round one were announced:
+    62 entries + RANDOM, from 6 countries.
+    TFT were again the winner.
+        (HKUST)                 Game Theory                           56 / 59
+References
+
+
+
+
+Axelrod, Robert (1984), The Evolution of Cooperation, Basic Books, ISBN
+0-465-02122-0
+A List of Strategies:
+http://www.iterated-prisoners-dilemma.net/
+prisoners-dilemma-strategies.shtml
+
+
+
+
+        (HKUST)                Game Theory                          57 / 59
+Some Formal Properties (Axelrod)
+
+
+Discount factor It is typical to discount future. In iterated prisoner’s
+dilemma, future encounters can be similarly discounted, say by a weight w ,
+0 ≤ w ≤ 1, so scores from the nth encounter contributes only w (n−1) s,
+where s is the payoff received at the nth game. In the iterated game
+setting, the weight is the same as the probability of playing your oponent
+again the next time.
+Proposition 1 If the discount weight w is sufficient large, then there is no
+strategy that is best against all possible strategies used by the other player.
+Think about which strategy is best against ALL D or Permanent
+Retaliation (C until the oponent plays D, then ALL D).
+
+
+
+
+        (HKUST)                    Game Theory                              58 / 59
+Properties (Cont’d)
+
+TFT is also robust: performs well in a wide variety of environments. This
+is an informal statement supported by the tournaments and further
+experiments.
+A strategy is colelctively stable if no strategy can invade it. A strategy S
+can invade strategy G if given a large group of individuals all using G , a
+new individual using S can get a better score than the individuals using G .
+Proposition 2 TFT is collectively stable if and only if, w is large enough.
+This value of w is a function of the four payoff parameters T , R, P, S.
+Proposition 3 ALL D is always collectively stable. However, ALL D can
+be invaded by a cluster of individuals, and this cluster needs only be a
+small proposition of the original population.
+Proposition 4 A strategy is nice if it is not the one to defect the first. If a
+nice strategy cannot be invaded by an individual, then it cannot be
+invaded by any cluster of the original population.
+
+        (HKUST)                    Game Theory                              59 / 59
+

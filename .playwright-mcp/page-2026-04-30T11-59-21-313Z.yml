@@ -1,0 +1,67 @@
+- generic [ref=e4]:
+  - generic [ref=e237]:
+    - banner [ref=e238]:
+      - generic [ref=e239]:
+        - generic [ref=e242]: "Status: In Loop"
+        - heading "EduMind." [level=1] [ref=e243]
+      - img "Avatar" [ref=e245] [cursor=pointer]
+    - generic [ref=e246]:
+      - generic [ref=e247]:
+        - img [ref=e249]
+        - generic [ref=e251]:
+          - generic [ref=e252]: "3"
+          - generic [ref=e253]: Active Concepts
+      - generic [ref=e254]:
+        - img [ref=e256]
+        - generic [ref=e262]:
+          - generic [ref=e263]: 100%
+          - generic [ref=e264]: Mastery
+    - button "Feed the Brain Ingest new materials" [ref=e266]:
+      - generic [ref=e267]:
+        - img [ref=e269]
+        - generic [ref=e272]:
+          - heading "Feed the Brain" [level=3] [ref=e273]
+          - paragraph [ref=e274]: Ingest new materials
+    - generic [ref=e275]:
+      - heading "Active Roadmap" [level=3] [ref=e276]: Active Roadmap
+      - button "Insights ↗" [ref=e278]
+    - generic [ref=e282]:
+      - generic [ref=e286] [cursor=pointer]:
+        - generic [ref=e287]:
+          - generic [ref=e288]:
+            - img [ref=e290]
+            - generic [ref=e293]:
+              - heading "Current Course" [level=4] [ref=e294]
+              - generic [ref=e295]:
+                - generic [ref=e296]: 3 Concepts
+                - generic [ref=e297]: • 0 weak
+          - img [ref=e299]
+        - generic [ref=e302]:
+          - generic [ref=e303]: Retained Mastery
+          - generic [ref=e304]: 100%
+      - generic [ref=e309] [cursor=pointer]:
+        - generic [ref=e310]:
+          - img [ref=e312]
+          - generic [ref=e315]:
+            - heading "Knowledge Map" [level=5] [ref=e316]
+            - paragraph [ref=e317]: Review current backend concepts
+        - img [ref=e319]
+      - generic [ref=e326]: Upload material to create more concepts
+    - generic [ref=e327]:
+      - heading "Recent Activity" [level=3] [ref=e328]
+      - generic [ref=e330] [cursor=pointer]:
+        - img [ref=e332]
+        - generic [ref=e334]:
+          - heading "Backend Concepts Loaded" [level=5] [ref=e335]
+          - paragraph [ref=e336]: 3 total • 3 active
+        - generic [ref=e337]:
+          - generic [ref=e338]: "0"
+          - generic [ref=e339]: Weak
+  - generic [ref=e340]:
+    - button [ref=e341]:
+      - img [ref=e343]
+    - button [ref=e346]:
+      - img [ref=e347]
+    - button [ref=e348]:
+      - img [ref=e349]
+  - generic: Study loop initialized successfully

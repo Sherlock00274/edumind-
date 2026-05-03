@@ -1,0 +1,146 @@
+                   Sample Solution for Assignment 3
+
+
+Problem 1
+One translation is the set of the formulas:
+
+                                1.       M ythical ⊃ ¬M ortal
+                                2. ¬M ythical ⊃ (M ortal ∧ M ammal)
+                                3. (¬M ortal ∨ M ammal) ⊃ Horned
+                                4.        Horned ⊃ M agical
+    M ythical:
+Can not be inferred from the clauses. The assignment that makes M ythical false and all others true will
+satisfy the above sentences.
+    M agical:
+
+               5.                   ¬M agical                   Negation of the goal
+               6.              ¬Horned ∨ M agical                     from 4
+               7.                    ¬Horned                       from 5 and 6
+               8.  (M ortal ∨ Horned) ∧ (¬M ammal ∨ Horned)           from 3
+               9.              M ortal ∧ ¬M ammal                  from 7 and 8
+              10. (M ythical ∨ M ortal) ∧ (M ythical ∨ M ammal)       from 2
+              11.              M ortal ∧ M ythical                from 9 and 10
+              12.           M ortal ∧ ¬M ortal =⇒ [ ]             from 1 and 11
+Hence, the unicorn is Magical.
+    Horned:
+Given the negation of the goal ¬Horned, repeat the step from 7 in the above question and then an empty
+set will be derived. Hence, the unicorn is Horned as well.
+
+Problem 2
+Vocabulary:
+T ake(x, y) : Student x take course y
+F ail(x, y) : Student x fails in course y
+Like(x, y) : Person x likes person y
+V egetarian(x) : Person x is a vegetarain
+Smart(x) : Person x shave for person y in the town
+Student(x) : Person x is a student
+DHF (x, y) : Person x does homework for person y
+
+a. Not all students take both History and Biology.
+¬∀x(T ake(x, History) ∧ T ake(x, Biology))
+b. Only one student failed History.
+∃x(F ail(x, History) ∧ ∀y(F ail(y, History) ⊃ y = x))
+c. Every person who dislikes all vegetarians is smart.
+∀x(∀y(V egetarian(y) ⊃ ¬Like(x, y)) ⊃ Smart(x))
+d. No person likes a smart vegetarian.
+¬∃x[∃y(Like(x, y) ∧ V egetarian(y) ∧ Smart(y))]
+
+
+
+                                                   1
+e. There is a student who does homework for those and only those who do not do homework for them-
+selves.
+∃x{Student(x) ∧ ∀y[DHF (x, y) ≡ ¬DHF (y, y)]}
+
+
+
+Problem 3
+Initially, Σcur = {e1 , e2 , e3 , e4 , e5 , e6 , e7 , e8 , e9 , e10 , e11 , }, π = { }
+    • Iteration 1:
+      Γ = true
+      τ = Γ ⊃ HIRE (Note: for γα = n+                           +
+                                    α /nα , if both nα = 0 and nα = 0, we will have γα = 0)
+
+                                  α      GPA UST             HKU CU          REC EXP     γ
+                                  γα     4/7 1/3              2/4 1/4        4/8 3/4   EXP
+                                  γα     3/3 0/1              2/2 1/1        3/3  −  EXP ∧ GPA
+
+       τ = EXP ∧ GP A ⊃ HIRE
+       π = {EXP ∧ GP A ⊃ HIRE}
+       Σcur = {e2 , e4 , e6 , e7 , e8 , e9 , e10 , e11 , }
+    • Iteration 2:
+      Γ = true
+      τ = Γ ⊃ HIRE
+                                  α      GPA UST             HKU      CU     REC         EXP     γ
+                                  γα     1/4 1/3              0/2     0/3    1/5         0/1   UST
+                                  γα     1/2  −               0/0     0/0    1/1         0/1 UST ∧ REC
+
+       τ = U ST ∧ REC ⊃ HIRE
+       π = {EXP ∧ GP A ⊃ HIRE, U ST ∧ REC ⊃ HIRE}
+       Σcur = {e2 , e6 , e7 , e8 , e9 , e10 , e11 , }
+
+Since all the positive instances are covered by the rules in, so the set of rules about when to hire an
+applicant learnt using GSCA is:
+EXP ∧ GP A ⊃ HIRE and U ST ∧ REC ⊃ HIRE
+
+Problem 4
+In the following, let A denotes Alarm, J for JohnCalls, etc. You’ll get fullmark as long as the formulas
+are correct, regardless if you have done the calculation.
+                         X                 X
+                P (A) =      P (A, B, E) =    P (A|B, E)P (B)P (E) = 0.0025
+                               B,E                      B,E
+                    P (¬A) = 1 − P (A) = 0.9975
+                    P (M ) = P (M |A)P (A) + P (M |¬A)P (¬A) = 0.012
+                    P (J, M ) = P (J, M, A) + P (J, M, ¬A) = P (J, M |A)P (A) + P (J, M |¬A)P (¬A)
+                           = P (J|A)P (M |A)P (A) + P (J|¬A)P (M |¬A)P (¬A) = 0.002
+                    P (J|M ) = P (J, M )/P (M ) = 0.17
+
+Problem 5
+1. P (Sam)
+2. G(Clyde)
+3. L(Clyde, Oscar)
+4. P (Oscar) ∨ G(Oscar)
+
+
+                                                                     2
+5. L(Oscar, Sam)
+6. ¬G(x) ∨ ¬P (y) ∨ ¬L(x, y)
+The resolution refutation is:
+7. ¬G(Clyde) ∨ ¬P (Oscar) from 3 and 6
+8. ¬P (Oscar) from 2 and 7
+9. ¬G(Oscar) ∨ ¬P (Sam) from 5 and 6
+10.¬G(Oscar) from 1 and 9
+11. P (Oscar) from 10 and 4
+12. N il from 11 and 8
+
+Problem 6
+The unique Nash equilibrium of this game would be (Pol:expand, Fed:contract), i.e.(3,3) in the payoff
+matrix.
+
+Problem 7
+Formulate this auction as a game in normal form:
+   • A set of agents N = {1, 2};
+   • The same set of actions for each agent A1 = A2 = {1, 2, 3, 4, 5, 6};
+
+   • Utility functions                        
+                                                  6 − xi       if agent i wins the auction
+                            ui (x1 , x2 ) =
+                                                    0                   otherwise
+
+Generate the payoff matrix as follows to find the Nash equilibria:
+
+                                     1         2         3        4        5        6
+                              1   2.5, 2.5    0, 4      0, 3     0, 2     0, 1     0, 0
+                              2     4, 0      2, 2      0, 3     0, 2     0, 1     0, 0
+                              3     3, 0      3, 0    1.5, 1.5   0, 2     0, 1     0, 0
+                              4     2, 0      2, 0      2, 0     1, 1     0, 1     0, 0
+                              5     1, 0      1, 0      1, 0     1, 0   0.5, 0.5   0, 0
+                              6     0, 0      0, 0      0, 0     0, 0     0, 0     0, 0
+
+From the matrix, we can see that the Nash equilibria are (4, 4), (5, 5) and (6, 6).
+
+
+
+
+                                                           3
+

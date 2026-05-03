@@ -1,0 +1,60 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e11]: "Status: In Loop"
+        - heading "EduMind." [level=1] [ref=e12]
+      - img "Avatar" [ref=e14] [cursor=pointer]
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - img [ref=e18]
+        - generic [ref=e20]:
+          - generic [ref=e21]: "1"
+          - generic [ref=e22]: Active Concepts
+      - generic [ref=e23]:
+        - img [ref=e25]
+        - generic [ref=e31]:
+          - generic [ref=e32]: 50%
+          - generic [ref=e33]: Mastery
+    - generic [ref=e34]:
+      - heading "Active Roadmap" [level=3] [ref=e35]: Active Roadmap
+      - button "Insights ↗" [ref=e37]
+    - generic [ref=e41]:
+      - generic [ref=e45] [cursor=pointer]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - img [ref=e49]
+            - generic [ref=e52]:
+              - heading "CSIT5900 Artificial Intelligence" [level=4] [ref=e53]
+              - generic [ref=e54]:
+                - generic [ref=e55]: 1 Concepts
+                - generic [ref=e56]: • 1 weak
+          - img [ref=e58]
+        - generic [ref=e61]:
+          - generic [ref=e62]: Retained Mastery
+          - generic [ref=e63]: 50%
+      - generic [ref=e67] [cursor=pointer]:
+        - generic [ref=e68]:
+          - img [ref=e70]
+          - generic [ref=e73]:
+            - heading "Knowledge Map" [level=5] [ref=e74]
+            - paragraph [ref=e75]: Chapters, materials, concepts
+        - img [ref=e77]
+      - generic [ref=e84]: Open Knowledge Map to add materials
+    - generic [ref=e85]:
+      - heading "Recent Activity" [level=3] [ref=e86]
+      - generic [ref=e88] [cursor=pointer]:
+        - img [ref=e90]
+        - generic [ref=e92]:
+          - heading "CSIT5900 Artificial Intelligence" [level=5] [ref=e93]
+          - paragraph [ref=e94]: 6 chapters • 0 files
+        - generic [ref=e95]:
+          - generic [ref=e96]: "1"
+          - generic [ref=e97]: Weak
+  - generic [ref=e98]:
+    - button [ref=e99]:
+      - img [ref=e101]
+    - button [ref=e104]:
+      - img [ref=e105]
+    - button [ref=e106]:
+      - img [ref=e107]

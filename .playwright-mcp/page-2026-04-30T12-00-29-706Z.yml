@@ -1,0 +1,29 @@
+- generic [ref=e352]:
+  - generic [ref=e353]:
+    - button [ref=e354]:
+      - img [ref=e355]
+    - generic [ref=e363]: 1 / 3
+  - generic [ref=e366]:
+    - generic:
+      - generic: UNSURE
+    - generic:
+      - generic: MASTERED
+    - generic [ref=e367]:
+      - generic [ref=e368]:
+        - generic [ref=e369]: Search Algorithms
+        - img [ref=e371]
+      - heading "A* Search" [level=2] [ref=e377]
+      - generic [ref=e380]: Tap card to reveal
+    - generic [ref=e381]:
+      - heading "A*搜索" [level=3] [ref=e384]
+      - paragraph [ref=e386]: A* search uses the evaluation function f(n) = g(n) + h(n), where g(n) is the cost from the start node to node n, and h(n) is the heuristic estimate of the cost from n to the goal. It combines uniform-cost search and greedy best-first search.
+      - generic [ref=e387]:
+        - generic [ref=e388]:
+          - img [ref=e389]
+          - text: paragraph 1
+        - button "FULL DOC" [ref=e392]:
+          - text: FULL DOC
+          - img [ref=e393]
+  - generic [ref=e400]:
+    - button "Unsure" [ref=e401]
+    - button "Mastered" [ref=e402]

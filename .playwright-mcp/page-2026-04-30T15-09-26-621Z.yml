@@ -1,0 +1,78 @@
+- generic [ref=e4]:
+  - generic [ref=e131]:
+    - banner [ref=e132]:
+      - generic [ref=e133]:
+        - generic [ref=e136]: "Status: In Loop"
+        - heading "EduMind." [level=1] [ref=e137]
+      - img "Avatar" [ref=e139] [cursor=pointer]
+    - generic [ref=e140]:
+      - generic [ref=e141]:
+        - img [ref=e143]
+        - generic [ref=e145]:
+          - generic [ref=e146]: "0"
+          - generic [ref=e147]: Active Concepts
+      - generic [ref=e148]:
+        - img [ref=e150]
+        - generic [ref=e156]:
+          - generic [ref=e157]: 0%
+          - generic [ref=e158]: Mastery
+    - generic [ref=e159]:
+      - button "Create Course Start with syllabus" [ref=e160]:
+        - generic [ref=e161]:
+          - img [ref=e163]
+          - generic [ref=e166]:
+            - heading "Create Course" [level=3] [ref=e167]
+            - paragraph [ref=e168]: Start with syllabus
+      - generic [ref=e170]:
+        - generic [ref=e171] [cursor=pointer]:
+          - button "Choose syllabus Course outline first" [ref=e172]
+          - generic [ref=e173]:
+            - img [ref=e175]
+            - generic [ref=e178]:
+              - generic [ref=e179]: Choose syllabus
+              - generic [ref=e180]: Course outline first
+        - button "Analyze Files" [disabled] [ref=e181]:
+          - img [ref=e182]
+          - text: Analyze Files
+    - generic [ref=e185]:
+      - heading "Active Roadmap" [level=3] [ref=e186]: Active Roadmap
+      - button "Insights ↗" [ref=e188]
+    - generic [ref=e192]:
+      - generic [ref=e196]:
+        - generic [ref=e198]:
+          - img [ref=e200]
+          - generic [ref=e203]:
+            - heading "No Course Yet" [level=4] [ref=e204]
+            - generic [ref=e205]:
+              - generic [ref=e206]: 0 Concepts
+              - generic [ref=e207]: • 0 weak
+          - img [ref=e209]
+        - generic [ref=e213]:
+          - generic [ref=e214]: Retained Mastery
+          - generic [ref=e215]: 0%
+      - generic [ref=e219] [cursor=pointer]:
+        - generic [ref=e220]:
+          - img [ref=e222]
+          - generic [ref=e224]:
+            - heading "Manage Chapters & Materials" [level=5] [ref=e225]
+            - paragraph [ref=e226]: Upload files and choose review scope
+        - generic [ref=e227]: Open
+    - generic [ref=e228]:
+      - heading "Recent Activity" [level=3] [ref=e229]
+      - generic [ref=e231] [cursor=pointer]:
+        - img [ref=e233]
+        - generic [ref=e235]:
+          - heading "No Course Created" [level=5] [ref=e236]
+          - paragraph [ref=e237]: Upload syllabus to build course
+        - generic [ref=e238]:
+          - generic [ref=e239]: "0"
+          - generic [ref=e240]: Weak
+  - generic [ref=e100]:
+    - button [ref=e101]:
+      - img [ref=e103]
+    - button [ref=e106]:
+      - img [ref=e107]
+    - button [ref=e112]:
+      - img [ref=e113]
+    - button [ref=e114]:
+      - img [ref=e115]

@@ -1,0 +1,904 @@
+                     CSIT5900
+Lecture 4: Markov Decision Process and Reinforcement
+                      Learning
+
+
+              Department of Computer Science and Engineering
+              Hong Kong University of Science and Technology
+
+
+
+
+    (HKUST)                 Markov Decision Process            1 / 57
+Nondeterministic Actions
+Games of chances: backgammon, blackjack, Russian roulette, and many
+more.
+    One shot decision: You are given a choice of (1) take $100; (2) flip
+    a coin, if it’s head then you get $400 and if it’s tail then you lose
+    $200. What would you do?
+    Money, time, and deadline: You can take a taxi to the airport
+    which takes 40 minutes and costs $300.00 normally (.9 probability)
+    but could be delayed up to 30 minutes (0.09 prob) or never get there
+    (0.01 prob). You can also take public transportation which takes 80
+    minutes and costs $50 normally (.99 prob) but could be delayed up to
+    30 minutes (0.009 prob) or never get there (0.001 prob). You need to
+    get to the airport by 3pm and it’s now 1pm. Which one would you
+    take?
+    Any difference between uncertainty about your own action and
+    undertainty about the environment: Jump over a puddle of water
+    vs take a step forward.
+        (HKUST)              Markov Decision Process                   2 / 57
+Planning under Uncertainty
+
+
+
+   You are at floor 0 and your goal is to get to floor 6. You have
+   available the following actions: Walk up one floor, which always
+   succeeds, or roll a dice and it will magically take you up k floors with
+   0.5 probability, where k is the number on the six-faced dice that
+   shows up after you rolled it, but with 0.5 probability you’ll stay where
+   you are.
+   If you want to minimize time, what is your best plan?
+
+
+
+
+      (HKUST)                Markov Decision Process                     3 / 57
+Search Problems
+
+
+Recall a search problem consists of:
+    A set of states.
+    A starting state.
+    A set of actions that map states to states.
+    Goal condition.
+    Cost function: cost of doing an action.
+Markov Decision Process (MDP): actions are indeterminate, the cost
+function depends on the starting and ending states of the action.
+
+
+
+
+        (HKUST)               Markov Decision Process                4 / 57
+MDP
+
+A MDP consists of:
+    A set of states.
+    A starting state.
+    A set of actions modeled by a global probabilistic transition relation:
+    T (s, a, s 0 ) - the probability of reaching state s 0 from s by taking
+    action a.
+    Reward function: Reward(s, a, s 0 ) - the reward for ending in s 0 when
+    taking action a in s.
+    Goal (terminating) condition: End(s).
+    A discount factor 0 ≤ γ ≤ 1.
+
+
+
+
+       (HKUST)                Markov Decision Process                     5 / 57
+A Dice Game
+
+
+
+
+A dice game from Percy Liang: at each round, you choose either:
+    quit - you get $10.
+    stay - you get $4 and a 6 sided dice is rolled and if it comes up 1 or 2,
+    then end of the game otherwise continue the game to the next round.
+
+
+
+
+        (HKUST)               Markov Decision Process                     6 / 57
+A Dice Game - MDP Formulation
+
+
+   States: in (start of the game) and out (end of the game).
+   Starting state: in.
+   End(s) iff s = out.
+   Actions: quit and stay .
+   T (in, quit, out) = 1, T (in, stay , out) = 2/6, T (in, stay , in) =
+   4/6, T (out, x, out) = 1.
+   Reward(in, quit, out) = 10, Reward(in, stay , in) =
+   4, Reward(in, stay , out) = 4.
+
+
+
+
+       (HKUST)                 Markov Decision Process                    7 / 57
+Transitions
+
+
+
+    The transition probabilities T (s, a, s 0 ) specifies the probability of
+    ending up in state s 0 when doing action a in s.
+    If T (s, a, s 0 ) 6= 0, then s 0 is a possible successor.
+    Since these are probabilities, they sum up to 1:
+                               X
+                                   T (s, a, s 0 ) = 1.
+                                   s0
+
+
+
+
+        (HKUST)                  Markov Decision Process                       8 / 57
+Policies
+
+
+
+
+What is a solution for MDP? A solution needs to tell which action to take
+in every possible situation.
+A policy π is a mapping from states to actions. For example, here is a
+policy for playing the dice game is: π(s) = stay if s = in, and nil
+otherwise. Here nil means no action, and is added so that policies are
+functions: T (s, nil, s) = 1 and Reward(s, nil, s 0 ) = 0.
+
+
+
+
+        (HKUST)              Markov Decision Process                   9 / 57
+Evaluating a policy
+
+
+There are many policies. How do you compare them? The usual suspect:
+expected utilities.
+Consider the above policy π for the dice game. If it yields the following
+run:
+                         in, stay , 4, in, stay , 4, out
+then its utility is the the sum of the discounted rewards along the sequence:
+
+        Reward(in, stay , in) + γReward(in, stay , out) = 4 + γ × 4.
+
+But the policy can yield many other runs. In fact it yield infinite number
+of runs.
+
+
+
+
+        (HKUST)                Markov Decision Process                    10 / 57
+Evaluating a policy
+
+
+In discrete math, an effective way of dealing with possibly infinite sequence
+is to set up recurrences:
+                        i=n
+                        X
+              f (n) =         i ⇒ f (0) = 0, f (n) = n + f (n − 1).
+                        i=0
+
+Given a policy π, let Vπ (s) be the expected utility of following π in state s:
+          (
+            0,                                                      if End(s)
+ Vπ (s) = P                     0                   0          0
+               s 0 T (s, π(s), s )[Reward(s, π(s), s ) + γVπ (s )], otherwise
+
+
+
+
+        (HKUST)                   Markov Decision Process                   11 / 57
+Evaluating a policy
+
+
+It’s more common to write the recurrences using a mutual recursion on
+what’s called Q-value: Given a policy π
+    Value: Vπ (s) - the expected utility of following π in state s.
+    Q-value: Qπ (s, a) - the expected utility of doing a in s and then
+    following π.
+                             (
+                                0,              if End(s)
+                    Vπ (s) =
+                                Qπ (s, π(s)), otherwise
+                      X
+          Qπ (s, a) =     T (s, a, s 0 )[Reward(s, a, s 0 ) + γVπ (s 0 )].
+                       s0
+
+
+
+
+        (HKUST)                Markov Decision Process                       12 / 57
+Policy Evaluation - Example
+
+Now consider the policy of stay: π(in) = stay , for the dice game.
+Assuming γ (discount factor) is 1.
+
+     Vπ (out) = 0,
+      Vπ (in) = Qπ (in, stay )
+                X
+              =     T (in, stay , s 0 )[Reward(in, stay , s 0 ) + γVπ (s 0 )]
+                       s0
+                  = T (in, stay , in)[Reward(in, stay , in) + γVπ (in)] +
+                      T (in, stay , out)[Reward(in, stay , out) + γVπ (out)]
+                  = 2/3(4 + Vπ (in)) + 1/3(4 + 0)
+                  = 2/3(4 + Vπ (in)) + 4/3
+
+Thus Vπ (in) = 12.
+
+
+        (HKUST)                  Markov Decision Process                        13 / 57
+Policy Evaluation - An Iterative Procedure
+
+In the general case, there may not be a closed form solution. But we can
+use an iterative procedure to compute it
+Policy Evaluation
+Initialize Vπ0 (s) = 0 for all s.
+For each t=1,...,Max:
+      For each state s:
+        Vπt (s) = s 0 T (s, π(s), s 0 )[Reward(s, π(s), s 0 ) + γVπt−1 (s 0 )].
+                 P
+
+How many iterations (Max) to try? Stop when V t doesn’t change much.
+Try it on the dice game:
+
+                      Vπt (in) = 2/3(4 + Vπt−1 (in)) + 4/3.
+
+
+
+         (HKUST)                    Markov Decision Process                       14 / 57
+Optimal Policy and Value Function
+
+   Policy evaluation computes the value of a state when executing the
+   given policy.
+   Given a MDP, we want to know the optimal policy and the optimal
+   value function (maximal values of states)
+   A policy πopt is optimal if for every policy π 0 , Vπopt (s) ≥ Vπ0 (s) for all
+   s.
+   A value function V ∗ is optimal if
+
+                        V ∗ (s) = maxπ Vπ (s) = Vπopt (s).
+
+   We first look at how to find an optimal policy by a hill climbing
+   algorithm (policy iteration), then we look at how to compute the
+   optimal value using a value iteration procedure.
+
+
+       (HKUST)                 Markov Decision Process                       15 / 57
+Policy Iterations
+
+
+
+Policy iteration:
+     Initialize π to a random policy.
+     For i = 1, ..., MAX :
+       I    π = successor (π)
+The key is of course successor (π): improve a given policy π to a better
+one. This is called policy improvement.
+
+
+
+
+           (HKUST)              Markov Decision Process                    16 / 57
+Policy Improvement
+Given a policy π, how to make it better?
+     Better means that states have better values under the new policy.
+     Recall that Vπ (s) = Qπ (s, π(s)).
+     Now if we can find a policy π 0 such that
+     Vπ0 (s) = maxa∈Actions(s) Qπ (s, a), then Vπ0 (s) ≥ Vπ (s). Thus π 0 will
+     be as good as π, and likely better.
+Policy improvement: Given a policy π, improve it to πnew :
+     Compute Vπ (s) for every s.
+     Compute Qπ (s, a) for every s and a in Actions(s).
+     Let πnew be: for each s
+
+                     πnew (s) = arg maxa∈Actions(s) Qπ (s, a).
+
+So let successor (π) in policy iteration be πnew .
+
+         (HKUST)                Markov Decision Process                      17 / 57
+Policy Improvement: Example
+Consider again the dice example. Let the current policy π(in) = quit and
+let discount factor γ = 1.
+
+        Vπ (in) = 10, Vπ (out) = 0,
+                        X
+        Qπ (in, quit) =    T (in, quit, s)(Reward(in, quit, s) + γVπ (s))
+                           s
+                  = T (in, quit, out)(Reward(in, quit, out) + γVπ (out))
+                  = 10,
+                           X
+        Qπ (in, stay ) =       T (in, stay , s)(Reward(in, stay , s) + γVπ (s))
+                           s
+                  = 1/3(Reward(in, stay , out) + Vπ (out)) +
+                    2/3(Reward(in, stay , in) + Vπ (in))
+                  = 4 + 2/3(10) > 10
+
+Thus πnew (in) = stay .
+        (HKUST)                   Markov Decision Process                         18 / 57
+Value Iterations
+
+
+If we have an optimal policy, we can compute optimal value V ∗ (s) in every
+state s. However, it would be good if we can compute optimal values
+directly:
+
+            V ∗ (s) = 0, if End(s),
+            V ∗ (s) = maxa∈Actions(s) Qopt (s, a),
+                          X
+            Qopt (s, a) =   T (s, a, s 0 )[Reward(s, a, s 0 ) + γV ∗ (s 0 )]
+                            s0
+
+With these recurrences, we can then have an iterative procedure to
+compute it.
+
+
+
+
+        (HKUST)                  Markov Decision Process                       19 / 57
+Value Iterations
+
+
+
+Value iteration (Bellman 1957):
+    Initialize V 0 (s) = 0 for all s.
+    For t = 1,..., MAX:
+         For each state s,
+                                       X
+           V t (s) = maxa∈Actions(s)         T (s, a, s 0 )[Reward(s, a, s 0 ) + γV t−1 (s 0 )]
+                                        s0
+
+
+
+
+        (HKUST)                  Markov Decision Process                                     20 / 57
+Convergence
+
+
+
+
+Convergence Theorem: If either the discount factor γ < 1 or the MDP
+graph is acyclic, then both value iteration and policy iteration converge to
+the correct answer.
+
+
+
+
+        (HKUST)               Markov Decision Process                    21 / 57
+Reinforcement Learning
+
+
+
+    Given a MDP, we can use either policy iteration or value iteration to
+    compute optimal policy.
+    What if some of the components are unknown, like don’t know the
+    transition distribution?
+    Maybe you know the transition distribution, but it is too hard for you
+    to write it down.
+Reinforcement learning!
+
+
+
+
+        (HKUST)              Markov Decision Process                   22 / 57
+RL
+
+
+
+In class discussion:
+     Can an optimal controller be learned using RL for our
+     boundary-following robot?
+     Examples of RL?
+     Blackjack game: https://www.wikihow.com/Play-Blackjack and
+     https://www.youtube.com/watch?v=eyoh-Ku9TCI
+
+
+
+
+         (HKUST)              Markov Decision Process        23 / 57
+RL - General Considerations
+
+
+   Goal: Learn a policy to maximize the rewards.
+   Given: a set of actions to do in a state.
+   Assuming: know the states and have unlimited memory and
+   computational resource;
+   Question 1: how is a policy represented?
+   Question 2: which action to try in the present state?
+   Question 3: once an action is done and a reward received, how to
+   update the current policy?
+
+
+
+
+      (HKUST)                Markov Decision Process                  24 / 57
+RL - General Framework
+
+
+
+
+   Initialization.
+   Loop:
+     1    Collect data: execute the policy and records the results, including
+          rewards from the environment.
+     2    Update the “model” to get a “better” policy: the “model” could be
+          the transition relation, Q-values, or directly the policy.
+
+
+
+
+         (HKUST)                Markov Decision Process                         25 / 57
+Exploration vs Exploitation
+
+
+
+Given the current knowledge about the model (how the world works),
+which action to take:
+    Do the best action given what’s known about the world now
+    (exploitation, go by the book).
+    Try an action that hasn’t been tried before or did not work too well
+    last time (exploration, try something new).
+It’s clear that unless we have a perfect model of the world, we need to do
+both.
+
+
+
+
+        (HKUST)               Markov Decision Process                   26 / 57
+Epsilon-Greedy
+
+
+
+
+Epsilon-Greedy:
+               (
+                arg maxa∈Actions Q̂(s, a) with 1 −  probability
+        π(s) =
+                random a ∈ Actions        with  probability
+
+
+
+
+        (HKUST)              Markov Decision Process               27 / 57
+Representation
+
+
+
+How to update parameters (the model learned so far) depends on how
+they are represented:
+    Tabular representation: transition relations, rewards, values, Q-values,
+    policies are all represented by tables.
+    Approximation: approximated by efficient functions such as neural
+    networks - “deep reinforcement learning”.
+
+
+
+
+       (HKUST)                Markov Decision Process                    28 / 57
+Tabular representation: Monte Carlo Method
+Main idea of Monte Carlo Method: taking average of the sample. Samples:
+
+                         D = [s1 , a1 , r1 , s2 , a2 , r2 , s3 , ...]
+
+Estimating a model:
+
+                                            #(s, a, s 0 ) ∈ D
+                  T̂ (s, a, s 0 ) =     P                 00
+                                                                 ,
+                                            s 00 #(s, a, s ) ∈ D
+            ˆ
+          Reward(s, a, s 0 ) = average of {r : (s, a, r , s 0 ) ∈ D}
+
+Example: D = [S1 , A, 10, S2 , B, 8, S1 , A, 5, S1 , B, 2, S1 , A, 0, S1 ].
+                             ˆ
+T̂ (S1 , A, S1 ) = 2/3 and Reward(S  1 , A) = (10 + 5 + 0)/3.
+Given a model, optimal policy can then be computed using policy or value
+iterations.
+Question: Why estimating model when only want to compute optimal
+policy? Why not estimate policy directly? Why not just estimate Q(s, a)?
+        (HKUST)                     Markov Decision Process             29 / 57
+Monte Carlo Method - Q values
+
+Qπ (s, a) - the expected utility in s when taking action a and then
+following π.
+Samples:
+                       D = [s1 , a1 , r1 , s2 , a2 , r2 , s3 , ...]
+Utility at si :
+                           ui = ri + γri+1 + γ 2 ri+2 + ...
+Estimate:
+                    Q̂π (s, a) = average of {ut | st = s, at = a}
+Example: D = [S1 , A, 10, S2 , B, 8, S1 , A, 5, S1 , B, 2, S1 , A, 0, S1 ]. Let γ = 1.
+u1 = 10 + 8 + 5 + 2 + 0 = 25, u2 = 15, u3 = 7, u4 = 2, u5 = 0.
+Q̂(S1 , A) = (u1 + u3 + u5 )/3.
+
+
+
+          (HKUST)                  Markov Decision Process                         30 / 57
+Tabular Representation: Temporal Differences
+
+
+
+
+The Monte Carlo methods require an entire episode (epoch), which is a
+sequence of state-action-rewards transitions to a terminal state, in order to
+update the model/Q-values.
+Temporal differences take into account current knowledge about the
+model/Q-value, and update them in every step. A prominent method here
+is Watkin’s Q-learning.
+
+
+
+
+        (HKUST)                Markov Decision Process                    31 / 57
+Q-Learning
+Assume we have the current estimate of Q-value, Q̂(s, a) for all state s
+and action a. Now given an observed transition (S, A, r , S 0 ), update the
+estimated Q-value of (S, A) as follows:
+
+                  Q̂(S, A) = (1 − µ)Q̂(S, A) + µ(r + γ V̂ (S 0 )),
+
+where
+    µ is the learning rate;
+    γ the discount factor;
+    V̂ (S 0 ) = maxa∈Actions(S 0 ) Q̂(S 0 , a);
+    Q̂(S, A) in the right side is the old estimate, and r + γ V̂ (S 0 ) is the
+    new learned value;
+    the update formula strives for a balance between the old value and
+    the learned value, controlled by the learning rate µ.
+
+        (HKUST)                     Markov Decision Process                   32 / 57
+Deep Q-Learning (DQN)
+
+
+When the number of states are too large, one needs an efficient way of
+representing the Q-value (Q-function). The first work on using a deep
+neural network to represent a Q-function is done in Deepmind, in the
+context of playing Atari games like breakout:
+Playing Atari with Deep Reinforcement Learning (2013)
+By Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves,
+Ioannis Antonoglou, Daan Wierstra, Martin Riedmiller
+DeepMind Technologies
+https://arxiv.org/pdf/1312.5602.pdf
+https://www.youtube.com/watch?v=V1eYniJ0Rnk
+
+
+
+
+        (HKUST)              Markov Decision Process                     33 / 57
+DQN - Network
+Q-value function has two parameters: state and action. So a
+straightforward network would be:
+
+
+
+
+Not a good encoding! Why? (Hint: How many actions? How many
+states?)
+
+        (HKUST)              Markov Decision Process          34 / 57
+DQN - Network
+
+
+Unform encoding for both inputs and outputs: inputs are states, and
+outputs are Q-values, one for each action.
+
+
+
+
+        (HKUST)              Markov Decision Process                  35 / 57
+DQN - Loss
+
+
+
+
+How to train the DQN network:
+    Get some data;
+    Run backpropagation with gradient descent;
+    How? What’s the loss function?
+
+
+
+
+       (HKUST)              Markov Decision Process   36 / 57
+DQN - Online Q-Learning
+
+   What’s your data look like: {(S, A, S 0 , R)};
+   What’s the label: y = R + γVφ (S 0 ) = r + γmaxa Qφ (S 0 , a), where Qφ
+   is the current Q-value represented by the network with weights φ.
+   Online learning: one data at a time:
+
+
+
+
+   Is this gradient descent? Which hill is it descending to?
+
+
+
+      (HKUST)                Markov Decision Process                   37 / 57
+DQN
+The target, the label, needs to be stable, instead of a moving target!
+
+
+
+
+which is a generalization of the following DQN Q-learning algorithm:
+
+
+
+
+        (HKUST)               Markov Decision Process                    38 / 57
+Policy Gradients
+    If a policy is what we want in the end, why not represent it directly,
+    instead of through Q-function.
+    If we represent a policy by a deep neural network, how does the
+    learning algorithm work?
+    New RL algorithms: PPO and GRPO.
+    References:
+      I Williams, R. J. (1992). Simple statistical gradient-following algorithms
+        for connectionist reinforcement learning. Machine learning, 8(3).
+      I Schulman, J. et al. (2017). Proximal Policy Optimization Algorithms.
+
+        https://arxiv.org/abs/1707.06347
+      I Shao, Z. el al. (2024). DeepSeekMath: Pushing the Limits of
+
+        Mathematical Reasoning in Open Language Models.
+        https://arxiv.org/abs/2402.03300
+      I Sergey Levine (Berkeley) slides: http://rail.eecs.berkeley.edu/
+
+        deeprlcourse-fa17/f17docs/lecture_4_policy_gradient.pdf;
+      I Jan Peters (Max-Planck Institute, Germany) Scholarpedia article:
+
+        http://www.scholarpedia.org/article/Policy_gradient_
+        methods#Likelihood_Ratio_Methods_and_REINFORCE.
+          (HKUST)              Markov Decision Process                       39 / 57
+Stochastic Policies
+
+
+
+    A deterministic policy maps states to actions.
+    A stochastic policy maps states to a lottery over the set of actions.
+    The dice example: π(in) = {(stay , 0.8), (quit, 0.2)}.
+    A robot domain with five actions:
+    π(s) = {(South, 0.6), (East, 0.2), (West, 0.2), (North, 0), (Nil, 0)}.
+    Is there any need for a stochastic policy in MDP?
+
+
+
+
+       (HKUST)                 Markov Decision Process                       40 / 57
+Stochastic Policies
+
+
+
+Is there any need for a stochastic policy in MDP?
+    In theory: No. There is always an optimal deterministic policy.
+    In practice: Yes. When there are too many actions, too many states,
+    optimal policies may be impossible to compute, and deterministic
+    “good” policies may not be desirable.
+    Think about LLM, the next token generation as an action.
+
+
+
+
+        (HKUST)              Markov Decision Process                  41 / 57
+Stochastic Policies
+How to compute value of a stochastic policy?
+   No value recurrences, and value iteration does no work anymore.
+   Back to expected value formula: sum up all possible runs.
+   A policy π now a function from states to probability distributions on
+   actions. WeP denote by π(a|s) the probability of doing action a in
+   state s. So a π(a|s) = 1.
+   A run τ starting in s = s0 is a sequence s0 , a1 , ..., an , sn . Its
+   probability under π is
+                     p(τ ) = Πi π(ai+1 |si )T (si , ai+1 , si+1 ).
+    The value of π in s is then
+                                          X
+                   Vπ (s) = Eτ ∼p(τ )           γ i R(si , ai+1 , si+1 ).
+                                            i
+
+    This is also the basis of the objective function for reinforcement
+    learning, and sampling now plays the role of exploration.
+        (HKUST)                Markov Decision Process                      42 / 57
+The following notes are from Sergey Levine’s lecture note on policy
+gradients, with the following caveats:
+    rewards are binary r (s, a) instead of ternary R(s, a, s 0 ) in our case.
+    transition probability relation is written in conditional probability
+    form: p(s 0 |s, a) is our T (s, a, s 0 );
+    discount factor γ is assumed to be 1;
+    a policy is assumed to be represented by a neural network θ.
+
+
+
+
+        (HKUST)                Markov Decision Process                          43 / 57
+The goal of reinforcement learning
+                                         we’ll come back to partially observed later
+
+
+
+
+                                                     From Levine’s lecture note
+
+
+
+
+    (HKUST)        Markov Decision Process                                             44 / 57
+The goal of reinforcement learning
+
+
+
+
+              infinite horizon case                             finite horizon case
+
+
+
+
+                                                                       From Levine’s lecture note
+
+
+
+
+    (HKUST)                           Markov Decision Process                                       45 / 57
+Evaluating the objective
+
+
+
+
+                                              From Levine’s lecture note
+
+
+
+
+    (HKUST)         Markov Decision Process                                46 / 57
+Direct policy differentiation
+                                a convenient identity
+
+
+
+
+                                                        From Levine’s lecture note
+
+
+
+
+    (HKUST)          Markov Decision Process                                         47 / 57
+Direct policy differentiation
+
+
+
+
+                                               From Levine’s lecture note
+
+
+
+
+    (HKUST)          Markov Decision Process                                48 / 57
+Evaluating the policy gradient
+
+
+
+                                                                           fit a model to
+                                                                          estimate return
+
+
+
+                                 generate samples
+                                (i.e. run the policy)
+
+
+
+
+                                                                         improve the policy
+
+
+
+
+                                                        From Levine’s lecture note
+
+
+
+
+    (HKUST)         Markov Decision Process                                                   49 / 57
+PPO (Proximal Policy Optimization) - Motivation
+
+
+
+
+Problem with the REINFORCE algorithm that tries to maximise the
+expected value: “empirically it often leads to destructively large policy
+updates” (PPO paper https://arxiv.org/pdf/1707.06347)
+Solution: don’t update if it causes a big swing.
+
+
+
+
+        (HKUST)                Markov Decision Process                      50 / 57
+PPO Objective Function - Clipped Surrogate Objective
+Notation
+    Probability ratio rt (θ) = ππθ θ (a(at |st |st )t ) , where θold is the current model.
+                                       old
+   So rt (θold ) = 1, and rt (θ) > 1 if the current policy chooses a in s
+   more likely than the old one.
+   Advantage estimator Ât , intuitively the difference between the current
+   choice and the avarage: A(St , at ) = Q(st , at ) − V (st ). In practice, Q
+   is often taken to be the cumulative discounted rewards at time t for
+   the current trajectory, while a learned model (critic) is used to
+   compute V .
+   Clip function clip(x, a, b): a if x < a, b if x > b and x otherwise.
+PPO objective function:
+            LCLIP (θ) = Êt [min(rt (θ)Ât , clip(rt (θ), 1 − , 1 + )Ât )],
+where  is often 0.2. The first term is from TRPO (trust region policy
+optimization). It’s called a “surrogate” because it is not the real objective,
+rather a technical alternative for learning with neural network using
+gradient (HKUST)
+          descent.              Markov Decision Process                    51 / 57
+PPO Algorithm
+
+
+
+
+                                          From the PPO paper
+
+
+
+
+     (HKUST)    Markov Decision Process                        52 / 57
+GRPO
+
+
+  The PPO algorithm is expensive as it uses a large “critic” model to
+  estimate the advantage (Â).
+  Recall that advantage is supposed to measure the difference between
+  the value of doing a (Q(s, a)) and the expected value (V (s)).
+  Instead of using a large model to compute V , GRPO (Group Relative
+  Policy Optimization) from DeepSeek samples a group of different
+  outputs (trajectories, episodes, runs, traces, etc), calculates their
+  rewards, and computes an ”advantage” by comparing each reward to
+  the average reward of that group. Details in
+  https://arxiv.org/abs/2402.03300
+
+
+
+
+       (HKUST)             Markov Decision Process                  53 / 57
+Aligning LLMs with RLHF
+
+
+
+
+   Recall the three stages of LLM training: pretrain, instruction tuning,
+   and alignment.
+   Alignment is often done using reinforcement learning, following
+   OpenAI’s success aligning their models using Reinforement Learning
+   from Human Feedback (RLHF).
+
+
+
+
+      (HKUST)               Markov Decision Process                    54 / 57
+RLHF
+
+High-level description as given in the original RLHF paper:
+
+
+
+
+        (HKUST)               Markov Decision Process         55 / 57
+RLHF - Reward Model
+   A transformer model that takes in a prompt and a response, and
+   output a scalar reward.
+   The RLHF paper uses a 6B model initialised by a SFT model with the
+   final unembedding (decoding) layer removed.
+   A cross-entropy loss function for training the reward model:
+                        1
+            loss(θ) = − K  E(x,yw ,yl )∼D [log (σ(rθ (x, yw ) − rθ (x, yl )))]
+                           2
+   where
+     I D is a dataset of human pair-wise preference on K responses for each
+       prompt x, where K is typically between 4 and 9..
+     I rθ (x, y ) is the model’s reward for the response y to input x
+     I y
+         w is the preferred response out of the pair of yw and yl :
+       rθ (x, yw ) > rθ (x, yl ).
+     I σ(n) is the sigmoid function σ(n) =        1
+                                               1+e −n .
+   Intuitively, it is a form of logistic regression, where the model predicts
+   the probability thatone response is preferred over another.
+         (HKUST)                  Markov Decision Process                         56 / 57
+Take home messages for RL: Think carefully what you want the RL to
+learn in terms of episodes and rewards.
+
+
+
+
+       (HKUST)              Markov Decision Process                  57 / 57
+

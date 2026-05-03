@@ -1,0 +1,66 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e11]: "Status: In Loop"
+        - heading "EduMind." [level=1] [ref=e12]
+      - img "Avatar" [ref=e14] [cursor=pointer]
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - img [ref=e18]
+        - generic [ref=e20]:
+          - generic [ref=e21]: "14"
+          - generic [ref=e22]: Day Streak
+      - generic [ref=e23]:
+        - img [ref=e25]
+        - generic [ref=e31]:
+          - generic [ref=e32]: 82%
+          - generic [ref=e33]: Mastery
+    - button "Feed the Brain Ingest new materials" [ref=e35]:
+      - generic [ref=e36]:
+        - img [ref=e38]
+        - generic [ref=e41]:
+          - heading "Feed the Brain" [level=3] [ref=e42]
+          - paragraph [ref=e43]: Ingest new materials
+    - generic [ref=e44]:
+      - heading "Active Roadmap" [level=3] [ref=e45]: Active Roadmap
+      - button "Insights ↗" [ref=e47]
+    - generic [ref=e51]:
+      - generic [ref=e55] [cursor=pointer]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - img [ref=e59]
+            - generic [ref=e62]:
+              - heading "Search Theory" [level=4] [ref=e63]
+              - generic [ref=e64]:
+                - generic [ref=e65]: Chapter 2
+                - generic [ref=e66]: • 14m approx
+          - img [ref=e68]
+        - generic [ref=e71]:
+          - generic [ref=e72]: Retained Mastery
+          - generic [ref=e73]: 82%
+      - generic [ref=e78] [cursor=pointer]:
+        - generic [ref=e79]:
+          - img [ref=e81]
+          - generic [ref=e84]:
+            - heading "Advanced Heuristics" [level=5] [ref=e85]
+            - paragraph [ref=e86]: Unlock at 90% Mastery
+        - img [ref=e88]
+      - generic [ref=e95]: "Next Chapter: Logic Engines"
+    - generic [ref=e96]:
+      - heading "Recent Activity" [level=3] [ref=e97]
+      - generic [ref=e99] [cursor=pointer]:
+        - img [ref=e101]
+        - generic [ref=e103]:
+          - 'heading "Diagnostic: Search Theory" [level=5] [ref=e104]'
+          - paragraph [ref=e105]: Yesterday • 42m duration
+        - generic [ref=e106]:
+          - generic [ref=e107]: +12%
+          - generic [ref=e108]: Growth
+  - generic [ref=e109]:
+    - button [ref=e110]:
+      - img [ref=e112]
+    - button [ref=e115]:
+      - img [ref=e116]
+    - button [ref=e117]:
+      - img [ref=e118]

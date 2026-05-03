@@ -1,0 +1,781 @@
+                    CSIT 5900
+          Lecture 3: Agents that Search
+
+
+          Department of Computer Science and Engineering
+          Hong Kong University of Science and Technology
+
+
+
+
+(HKUST)                   Lecture 3: Search                1 / 34
+Overview
+
+
+
+
+   Search problems.
+   Uninformed search.
+   Hueristic search.
+   Hill Climbing.
+
+
+
+
+      (HKUST)           Lecture 3: Search   2 / 34
+Missionaries and cannibals problem
+From wikipedia (https:
+//en.wikipedia.org/wiki/Missionaries_and_cannibals_problem):
+    In the missionaries and cannibals problem, three missionaries and
+    three cannibals must cross a river using a boat which can carry
+    at most two people, under the constraint that, for both banks, if
+    there are missionaries present on the bank, they cannot be out-
+    numbered by cannibals (if they were, the cannibals would eat the
+    missionaries). The boat cannot cross the river by itself with no
+    people on board...
+    In the jealous husbands problem, the missionaries and cannibals
+    become three married couples, with the constraint that no woman
+    can be in the presence of another man unless her husband is also
+    present. Under this constraint, there cannot be both women and
+    men present on a bank with women outnumbering men...
+
+
+       (HKUST)               Lecture 3: Search                     3 / 34
+Search in State Spaces - The 8-Puzzle
+8-puzzle:
+
+   5        4                     5
+                                  1         4
+                                            2         3
+
+   6        1         88          6
+                                  8                   84
+
+   7        3         22         7          6         25
+
+        Start State                   Goal State
+
+8-puzzle solving agent:
+       Accessible environment: the agent knows exactly which state she is in.
+       Four possible actions: move blank left, right, up, or down.
+       Goal: find a sequence of actions that change the environment from
+       the initial to the goal state.
+          (HKUST)                 Lecture 3: Search                        4 / 34
+Search Problem Definition
+
+
+In general, a search problem consists of
+    A set of states
+    An initial state
+    A set of deterministic actions (or operators): if an action is
+    executable in a state, then it will produce a unique next state
+    A goal test
+    A path cost function
+A solution is a sequence of actions that leads to a goal state, i.e. a state
+in which the goal is satisfied.
+
+
+
+
+        (HKUST)                  Lecture 3: Search                         5 / 34
+8-Puzzle - a formulation
+
+
+
+    States: any arrangements of the blank and the numbers 1 to 8 on the
+    board.
+    Initial state: any given one.
+    Goal test: the blank in the middle, and the numbers are in order
+    clockwise starting from the left top corner.
+    Actions: move the blank left, right, up, or down.
+    Path cost: the length of the path.
+
+
+
+
+       (HKUST)                      Lecture 3: Search                  6 / 34
+Problem-Solving Agents
+
+
+   Problem-solving agents are often goal-directed.
+   Key ideas:
+     I To determine what the best action is, a problem-solving agent
+       systematically considers the expected outcomes of different possible
+       sequences of actions that lead to some goal state.
+     I A systematic search process is conducted in some representation space.
+
+   Steps:
+     1    Goal and problem formulation
+     2    Search process
+     3    Action execution
+
+
+
+
+         (HKUST)                 Lecture 3: Search                        7 / 34
+Searching For Solutions
+Searching for a solution to a problem can be thought of as a process of
+building up a search tree:
+     The root of the search tree is the node corresponding to the initial
+     state.
+     At each step, the search algorithm chooses one leaf node to expand by
+     applying all possible actions to the state corresponding to the node.
+
+
+
+ function GENERAL-SEARCH( problem, strategy) returns a solution, or failure
+   initialize the search tree using the initial state of problem
+   loop do
+        if there are no candidates for expansion then return failure
+        choose a leaf node for expansion according to strategy
+        if the node contains a goal state then return the corresponding solution
+        else expand the node and add the resulting nodes to the search tree
+   end
+
+
+
+           (HKUST)                               Lecture 3: Search                 8 / 34
+An Example Search Strategy:
+Breadth-First
+
+    Expand first the root node.
+    At each step, expand all leaf nodes.
+Some properties of the breadth-first search:
+    If there is a solution, then the algorithm will find it eventually.
+    If there are more than one solutions, then the first one returned will
+    be a one with the shortest length.
+    The complexity (both time and space complexity) of breadth-first
+    search is very high, making it inpractical for most real world problems.
+
+
+
+
+        (HKUST)                   Lecture 3: Search                          9 / 34
+Breadth-First Search of the Eight-Puzzle
+                                               19
+                                               2 8     2 8
+                                               1 6 3   1 6 3
+                                               7 5 4   7 5 4
+                                       9
+                                       2 8 3           2 8 3
+                                       1 6     18      1 5 6
+                                       7 5 4   2 8 3   7 4
+                                               1   6
+                                               7 5 4   2 3
+                           4                           1 8 6
+                                                       7 5 4
+                            2 8 3              17
+                            1 6 4
+                            7 5                2 8 3   2 8 3
+                                               1 4 5     1 6
+                                       8       7 6     7 5 4
+                                       2 8 3           2 8 3
+                                       1 4     16      1 4 5
+                                       7 6 5   2 8     7 6
+                                               1 4 3           1 2 3
+                                               7 6 5   2 8     7 8 4
+                                                       1 4 3     6 5
+                                                       7 6 5
+                                               15
+                                               2 3     2 3 4   27
+                                               1 8 4   1 8     1 2 3   Goal
+        1                  3           7       7 6 5   7 6 5   8 4
+Start   2 8 3               2 8 3      2   3                   7 6 5   node
+        1 6 4               1   4      1 8 4
+node                                                           2 8 3
+        7   5               7 6 5      7 6 5   14      26      7 1 4
+                                                 2 3   1 2 3   6 5
+                                               1 8 4     8 4
+                                               7 6 5   7 6 5   2 8 3
+                                                               7 4
+                                                               6 1 5
+                                               13      25      8 1 3
+                                               2 8 3   2 8 3   2 4
+                                               7 1 4   7 1 4   7 6 5
+                                                 6 5   6 5
+                                                               8 3
+                                       6                       2 1 4
+                                       2 8 3                   7 6 5
+                                         1 4
+                                                       24
+                                       7 6 5           8 3     2 8 3
+                                                       2 1 4   6 7 4
+                                               12      7 6 5   1 5
+                                                 8 3
+                                               2 1 4           2 8 3
+                                                               6 7 4
+                                               7 6 5   23        1 5
+                           2                           2 8 3
+                                                       6 7 4   2 8 3
+                            2 8 3                      1 5     6 4 5
+                            1 6 4                              1 7
+                              7 5
+                                                               2 8
+                                               11      22      6 4 3
+                                               2 8 3   2 8 3   1 7 5
+                                               6   4   6 4
+                                               1 7 5   1 7 5   2 3
+                                                               6 8 4
+                                       5                       1 7 5
+                                       2 8 3
+                                         6 4           21        2 3
+                                       1 7 5           2 3     6 8 4
+                                                       6 8 4   1 7 5
+                                                       1 7 5
+                                                               8 6 3
+                                                               2 4
+                                                               1 7 5
+                                               10      20
+                                                 8 3   8 3     8 3
+                                               2 6 4   2 6 4   2 6 4
+                                               1 7 5   1 7 5   1 7 5
+© 1998 Morgan Kaufman Publishers
+
+
+
+
+                                   (HKUST)                                    Lecture 3: Search   10 / 34
+Search Strategies
+    The search strategy determines the order in which nodes in the search
+    tree are expanded.
+    Different search strategies lead to different search trees.
+    Four different criteria that determine what the right search strategy is
+    for a problem:
+      I Completeness:
+        Is it guaranteed to find a solution if one exists?
+      I Time complexity:
+
+        How long does it take to find a solution?
+      I Space complexity:
+
+        How much memory is needed?
+      I Optimality:
+
+        Does it find the “best” solution if several different solutions exist?
+    Types:
+      I    Uninformed (or blind) search strategies
+      I    Informed (or heuristic) search strategies
+
+          (HKUST)                   Lecture 3: Search                            11 / 34
+Depth-First (Backtracking) Search
+             Depth-first search generates the successors of a node one at a time;
+             as soon as a successor is generated, one of its successors is generated;
+             Normally, a depth bound is used: no successor is generated whose
+             depth is greater than the depth bound;
+             the following is a depth-first search illustration using 8 puzzle with a
+             depth bound of 5.
+            2 8 3                              2 8 3                                            2 8 3
+            1 6 4                              1 6 4                                            1 6 4
+       0 7      5                         0 7      5                                       0 7      5
+
+
+    2 8 3                              2 8 3                                            2 8 3
+    1 6 4                              1 6 4                                            1 6 4
+1     7 5                          1     7 5                                        1     7 5
+
+
+    2 8 3                              2 8 3                                            2 8 3
+      6 4                                6 4                                              6 4
+2 175                              2 175                                            2 175
+      8 3                                8 3               2 8 3                                  2 8 3
+    2 6 4                              2 6 4               6 4                                    6 4
+3 175                              3 175                 7 175                                  7 175
+    8   3                              8 3                                                2   3
+    2 6 4                              2 6 4                                              6 8 4
+4 175                              4 175                                                8 175
+    8 3                                          8 6 3                                      2 3
+    2 6 4                                        2 4                                      6 8 4
+5 175                                          6 175     Discarded before               9 175
+                                                         generating node 7
+(a)                                (b)                                              (c)
+© 1998 Morgan Kaufman Publishers
+
+                    (HKUST)                                           Lecture 3: Search                   12 / 34
+Comparing Breadth-First and Depth-First Search
+
+
+
+In the following, b is the branching factor; d is the depth of solution; m is
+the depth bound of the depth first search:
+
+                         Time    Space         Optimal?    Complete?
+        Breadth First     bd      bd             Yes           Yes
+        Depth First       bm      bm             No       Yes, if m ≥ d
+
+
+
+
+        (HKUST)                  Lecture 3: Search                        13 / 34
+Iterative Deepening Search
+
+              A technique called iterative deepening enjoys the linear memory
+              requirements of depth-first search while guaranteeing optimality if a
+              goal can be found at all;
+              it conducts successive depth-first search, by increasing the depth
+              bound by 1 each time, until a goal is found:
+
+
+
+
+Depth bound = 1                    Depth bound = 2   Depth bound = 3        Depth bound = 4
+© 1998 Morgan Kaufman Publishers
+
+
+
+
+                        (HKUST)                                 Lecture 3: Search             14 / 34
+Avoiding Repeated States
+    Newly expanded nodes may contain states that have already
+    encountered before.
+    There are three ways to deal with repeated states, in increasing order
+    of effectiveness and computational overhead:
+       I Do not return to the state just came from.
+       I Do not create a path with cycles, that is, do not expand a node whose
+         state has appeared in the path already.
+       I Do not generate any state that was generated before.
+
+
+A state space that generates an exponentially large search tree:
+
+A                                        A
+
+
+B                            B                           B
+
+
+C                        C       C                 C         C
+
+
+D
+
+
+           (HKUST)                   Lecture 3: Search                     15 / 34
+Heuristic Search
+
+
+
+
+    A heuristic function is a mapping from states to numbers.
+    It normaly measures how far the current state is from a goal state, so
+    the smaller the value is the closer it is from the goal.
+    Heuristic or best-first search starts with a heuristic function and
+    chooses nodes that have smallest value to expand.
+
+
+
+
+       (HKUST)                  Lecture 3: Search                         16 / 34
+Eight Puzzle
+Consider the following heuristic function for the eight-puzzle:
+    f(n) = number of tiles out of place compared with goal
+Here is a search using this function (the number next to the node is its
+value of this function):
+                                   2 8 3
+                                   1 6 4
+                                 4 7   5
+
+
+
+             2 8 3                 2 8 3     2 8 3
+             1 6 4                 1 4       1 6 4
+         5     7 5               3 765     5 75
+
+             2 8 3                 2 3       2 8 3
+               1 4                 1 8 4     1 4
+         3 765                   3 765     4 765
+
+   8 3                   2 8 3
+ 2 1 4                   7 1 4              To the goal
+3 765                4     6 5
+
+
+
+ 8 3
+ 2 1 4
+3 765
+             To more fruitless wandering
+              (HKUST)                             Lecture 3: Search        17 / 34
+Eight Puzzle
+The following is the search using the same heuristic function but with path
+cost added:
+                                           2 8 3
+                                           1 6 4
+                                     0+4 7     5
+
+
+
+                             2 8 3         2 8 3                2 8 3
+                             1 6 4         1 4                  1 6 4
+                     1+5       7 5   1+3 7 6 5          1+5 7 5
+
+                             2 8 3         2 3                  2 8 3
+                               1 4         1 8 4                1 4
+                     2+3 7 6 5       2+3 7 6 5          2+4 7 6 5
+
+          8 3                2 8 3           2 3                2 3
+        2 1 4                7 1 4         1 8 4                1 8 4
+3+3 7 6 5            3+4       6 5   3+2 7 6 5          3+4 7 6 5
+
+                                           1 2 3
+                                             8 4
+                                     4+1 7 6 5
+
+                     Goal
+                             1 2 3         1 2 3
+                             8 4           7 8 4
+                     5+0 7 6 5       5+2     6 5
+
+© 1998 Morgan Kaufman Publishers
+                (HKUST)                            Lecture 3: Search    18 / 34
+A∗ Search
+
+
+
+
+   Evaluation function:
+     I    Sum of:
+             F     actual path cost g (n) from the start node to node n
+             F     estimated cost h(n)
+     I    Estimated cost of the cheapest path through node n
+   Idea: Try to find the cheapest solution.
+
+
+
+
+         (HKUST)                        Lecture 3: Search                 19 / 34
+A* Search by Tree
+A∗ search by trees - check only ancesters for repeated states
+  1   create a search tree T , consisting solely of the start node, n0 . Put n0
+      on a list called OPEN.
+  2   If OPEN is empty, then exit with failure.
+  3   Select the first node on OPEN, and remove it from OPEN. Call this
+      node n.
+  4   If n is a goal node, exit successfully with the solution corresponding
+      to the path from root n0 to this node.
+  5   Expand node n, generating the set M of its successors that are not
+      already ancestors of n in G . Install these members of M as children of
+      n in G , and add them to OPEN.
+  6   reorder the list OPEN in order of increasing g (n) + h(n) values. (Ties
+      are resolved in favor of the deepest node in the search tree.)
+  7   go to step 2.
+         (HKUST)                  Lecture 3: Search                         20 / 34
+Route Finding
+
+
+                                                                                                                                             Straight−line distance
+                     Oradea                                                                                                                  to Bucharest
+            71
+                                                                                         Neamt                                               Arad                  366
+                                                                                                      87
+                                                                                                                                             Bucharest               0
+                 Zerind
+       75
+                               151                                                                                                           Craiova               160
+                                                                                                                 Iasi                        Dobreta               242
+Arad
+                     140                                                                                                                     Eforie                161
+                                                                                                                      92                     Fagaras               178
+                                       Sibiu                Fagaras
+                                                   99                                                                                        Giurgiu                77
+  118                                                                                                                                        Hirsova               151
+                                                                                                                           Vaslui
+                                           80                                                                                                Iasi                  226
+                                                Rimnicu Vilcea                                                                               Lugoj
+            Timisoara                                                                                                                                              244
+                                                                                                                  142
+                                                                                                                                             Mehadia               241
+              111                                                 Pitesti         211                                                        Neamt                 234
+                               Lugoj                   97
+                                                                                                                                             Oradea                380
+                          70                                                                                          98                     Pitesti                98
+                                                                                                 85                            Hirsova
+                                                 146                        101                                                              Rimnicu Vilcea 193
+                               Mehadia                                                                     Urziceni
+                                                                                                                                    86       Sibiu                 253
+                          75                                138                               Bucharest                                      Timisoara             329
+              Dobreta                120
+                                                                                         90
+                                                                                                                                             Urziceni               80
+                                                   Craiova                                                                          Eforie   Vaslui                199
+                                                                                        Giurgiu                                              Zerind                374
+
+
+
+
+                    (HKUST)                                                  Lecture 3: Search                                                                   21 / 34
+A∗ Search for Route Finding
+
+
+Arad
+  f=0+366       Arad
+   =366
+
+  Sibiu         Timisoara                Zerind
+    f=140+253          f=118+329    f=75+374         Arad
+     =393               =447         =449
+
+                                     Sibiu          Timisoara                  Zerind
+                                                           f=118+329     f=75+374
+                                                            =447          =449
+                 Arad      Fagaras       Oradea       Rimnicu                  Arad
+                  f=280+366    f=239+178     f=146+380     f=220+193
+                   =646         =417          =526          =413
+                                                                 Sibiu        Timisoara                    Zerind
+                                                                                    f=118+329       f=75+374
+                                                                                     =447            =449
+                                          Arad      Fagaras       Oradea       Rimnicu
+                                           f=280+366    f=239+178     f=146+380
+                                            =646         =417          =526
+                                                                  Craiova             Pitesti                   Sibiu
+                                                                        f=366+160          f=317+98       f=300+253
+                                                                         =526               =415           =553
+
+
+
+
+            (HKUST)                               Lecture 3: Search                                             22 / 34
+Behavior of A∗
+
+
+We shall assume:
+    h is admissible, that is, it is never larger than the actual cost.
+    g is the sum of the cost of the operators along the path.
+    The cost of each operator is greater than some positive amount, .
+    The number of operators is finite (thus finite branching factor of
+    search tree).
+Under these conditions, we can always revise h into another admissible
+heuristic funtion so that the f = h + g values along any path in the search
+tree is never decreasing. (Monotonicity.) If f ∗ is the cost of an optimal
+solution, then
+
+
+
+
+        (HKUST)                  Lecture 3: Search                       23 / 34
+    A∗ expands all nodes with f (n) < f ∗ .
+    A∗ may expands some nodes with f (n) = f ∗ before finding goal.
+          O
+
+                                          N
+     Z
+
+                                                  I
+A
+    380             S
+                            F
+                                                      V
+              400
+T                   R
+
+              L                 P
+
+                                                          H
+              M                                   U
+                                              B
+                                420
+          D
+                                                          E
+                        C
+                                      G
+
+
+
+
+          (HKUST)                     Lecture 3: Search               24 / 34
+Completeness and Optimality of A∗
+Under these assumptions,
+    A∗ is complete: A∗ expands nodes in order of increasing f , there are
+    only finite number of nodes with f (n) ≤ f ∗ is finite, so it must
+    eventually expanded to reach a goal state.
+    A∗ is optimal: it will always return an optimal goal. Proof:
+    G -optimal, G2 -suboptimal.
+    It is impossible for A∗ to find G2 before G :
+                        Start
+
+
+
+           n
+
+
+    G                                               G2
+
+    It is optimally efficient: no other optimal algorithm is guaranteed to
+    expand fewer nodes than A∗ (Dechter and Pearl 1985).
+        (HKUST)                 Lecture 3: Search                        25 / 34
+Complexity of A∗
+
+
+   Complexity:
+     I Number of nodes expanded is exponential in the length of the solution.
+     I All generated nodes are kept in memory. (A∗ usually runs out of space
+       long before it runs out of time.)
+     I With a good heuristic, significant savings are still possible compared to
+
+       uninformed search methods.
+     I Admissible heuristic functions that give higher values tend to make the
+
+       search more efficient.
+   Memory-bounded extensions to A∗ :
+     I Iterative deepening A∗ (IDA∗ )
+     I Simplified memory-bounded A∗ (SMA∗ )
+
+
+
+
+         (HKUST)                Lecture 3: Search                            26 / 34
+Heuristic Functions for 8-Puzzle
+    Some possible candidates (admissible heuristic functions):
+         I    Number of tiles that are in the wrong position (h1 )
+         I    Sum of the city block distances of the tiles from their goal positions
+              (h2 )
+    Comparison of iterative deepening search, A∗ with h1 , and A∗ with h2
+    (avegared over 100 instances of the 8-puzzle, for various solution
+    lengths d):
+                       Search Cost                    Effective Branching Factor
+     d          IDS      A*(h1 )     A*(h2 )   IDS            A*(h1 )       A*(h2 )
+     2            10           6          6    2.45            1.79           1.79
+     4           112          13         12    2.87            1.48           1.45
+     6           680          20         18    2.73            1.34           1.30
+     8          6384          39         25    2.80            1.33           1.24
+    10         47127          93         39    2.79            1.38           1.22
+    12        364404         227         73    2.78            1.42           1.24
+    14       3473941         539        113    2.83            1.44           1.23
+    16             –        1301        211      –             1.45           1.25
+    18             –        3056        363      –             1.46           1.26
+    20             –        7276        676      –             1.47           1.27
+    22             –       18094       1219      –             1.48           1.28
+    24             –       39135       1641      –             1.48           1.26
+
+
+
+    We see that h2 is better than h1 .
+    In general, it is always better to use a heuristic function with higher
+    values, as long as it is admissible, i.e. does not overestimate: h2
+    dominates (is better than) h1 because for all node n, h2 (n) ≥ h1 (n).
+             (HKUST)                              Lecture 3: Search                    27 / 34
+Inventing Heuristic Functions
+
+
+Questions:
+    How might one have come up with good heuristics such as h2 for the
+    8-puzzle?
+    Is it possible for a computer to mechanically invent such heuristics?
+Relaxed Problem. Given a problem, a relaxed problem is one with less
+restrictions on the operators.
+Strategy. use the path cost of a relaxed problem as the heuristic function
+for the original problem.
+
+
+
+
+        (HKUST)                 Lecture 3: Search                       28 / 34
+Inventing Heuristic Function - 8-Puzzle
+
+Example. Suppose the 8-puzzle operators are described as:
+    A tile can move from square A to B if A is adjacent to B and B
+    is blank.
+We can then generate three relaxed problems by removing some of the
+conditions:
+(a) A tile can move from square A to B if A is adjacent to B.
+(b) A tile can move from square A to B if B is blank.
+(c) A tile can move from square A to B.
+Using (a), we get h2 . Using (c), we get h1 .
+ABSOLVER (Prieditis 1993) is a computer program that automatically
+generates heuristics based on this and other techniques.
+
+
+
+        (HKUST)                  Lecture 3: Search                    29 / 34
+Search as Function Maximization
+
+
+   Funciton maximization problems: find a x such that Value(x) is
+   maximal.
+   Examples: 8-queens problem
+     I find a state in which none of the 8 queens are attacked.
+     I design a function on the states such that it’s value is maximal when
+       none of the queens are attacked.
+     I one such function can be: Value(n) = 1/e k(n) , where k(n) is the
+
+       number of queens that are attacked.
+   Another example: VLSI design - find a layout that satisfies the
+   constraints.
+
+
+
+
+         (HKUST)                Lecture 3: Search                             30 / 34
+Hill-Climbing
+Basic ideas:
+         Start at the initial state.
+         At each step, move to a next state with highest value.
+         It does not maintain the search tree and does not backtrack - it keeps
+         only the current node and its evaluation.
+
+evaluation
+
+
+
+
+                   current
+                   state
+
+
+
+
+             (HKUST)                   Lecture 3: Search                    31 / 34
+Hill-Climbing Search Algorithm
+
+ function HILL-CLIMBING( problem) returns a solution state
+   inputs: problem, a problem
+   static: current, a node
+           next, a node
+   current MAKE-NODE(INITIAL-STATE[problem])
+   loop do
+      next a highest-valued successor of current
+      if VALUE[next] < VALUE[current] then return current
+      current next
+   end
+
+
+
+
+            (HKUST)                                Lecture 3: Search   32 / 34
+Simulated Annealing
+   Hill-climbing can get easilty stuck in a local maximum.
+   One way to aovid getting stuck in a local maximum is by using
+   simulated annealing.
+   The main idea:
+     I at each step, instead of picking the best move, it picks a random move.
+     I if the move leads to a state with higher value, then execute the move.
+     I otherwise, execute the move with certain probability that becomes
+
+       smaller as the algorithm progresses.
+     I the probability is computed according to a function (schedule) that
+
+       maps time to probabilities.
+   The idea comes from the process of annealing - cooling metal liquid
+   gradually until it freezes.
+   It has been found to be extremely effective in real applications such
+   as factory scheduling.
+
+         (HKUST)                Lecture 3: Search                          33 / 34
+What Problems Can Be Formulated as Search Problems
+
+
+Your imagination is the limitation:
+    Robot navigating in a grid world, and GPS route planning: a robot in
+    a MxN grid world with 4 moving actions, in an intial location and
+    going to a goal location.
+    Robot task planning: classic blocks world domain.
+    Financial planning, choices for next 10 years: 10-year deposit returns
+    50%, 1-year deposit at year x returns expected 4.2+x/100%, 2-year
+    deposit at year x returns expected 8.5+x/50%,..., 9-year deposit at
+    year x returns expected 45%. How do you invest your money to
+    maximise your return in 10 years?
+
+
+
+
+        (HKUST)                 Lecture 3: Search                       34 / 34
+

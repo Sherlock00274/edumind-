@@ -1,0 +1,63 @@
+- generic [ref=e169]:
+  - generic [ref=e170]:
+    - heading "Define Scope" [level=1] [ref=e172]
+    - paragraph [ref=e173]: Select the concepts you want to master today.
+  - generic [ref=e174]:
+    - generic [ref=e175]:
+      - img [ref=e177]
+      - generic [ref=e182]:
+        - 'heading "Lecture 3: Search" [level=3] [ref=e183]'
+        - generic [ref=e184]: Root Node • 8 Nodes
+    - generic [ref=e187]:
+      - generic [ref=e189]:
+        - button [ref=e190]:
+          - img [ref=e191]
+        - button [ref=e193]:
+          - img [ref=e194]
+        - generic [ref=e197] [cursor=pointer]:
+          - heading "README.md" [level=4] [ref=e198]
+          - generic [ref=e200]: 8/8
+      - generic [ref=e201]:
+        - generic [ref=e202] [cursor=pointer]:
+          - img [ref=e207]
+          - generic [ref=e210]:
+            - paragraph [ref=e211]: Modular Monolith Architecture
+            - paragraph [ref=e212]: 模块化单体架构
+        - generic [ref=e213] [cursor=pointer]:
+          - img [ref=e218]
+          - generic [ref=e221]:
+            - paragraph [ref=e222]: Domain Engines
+            - paragraph [ref=e223]: 领域引擎
+        - generic [ref=e224] [cursor=pointer]:
+          - img [ref=e229]
+          - generic [ref=e232]:
+            - paragraph [ref=e233]: AI Gateway
+            - paragraph [ref=e234]: AI网关
+        - generic [ref=e235] [cursor=pointer]:
+          - img [ref=e240]
+          - generic [ref=e243]:
+            - paragraph [ref=e244]: LLM Configuration
+            - paragraph [ref=e245]: 大语言模型配置
+        - generic [ref=e246] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e254]:
+            - paragraph [ref=e255]: "Default LLM Model: deepseek-v4-flash"
+            - paragraph [ref=e256]: 默认大语言模型：deepseek-v4-flash
+        - generic [ref=e257] [cursor=pointer]:
+          - img [ref=e262]
+          - generic [ref=e265]:
+            - paragraph [ref=e266]: Local Development Setup
+            - paragraph [ref=e267]: 本地开发设置
+        - generic [ref=e268] [cursor=pointer]:
+          - img [ref=e273]
+          - generic [ref=e276]:
+            - paragraph [ref=e277]: Health Check Endpoint
+            - paragraph [ref=e278]: 健康检查端点
+        - generic [ref=e279] [cursor=pointer]:
+          - img [ref=e284]
+          - generic [ref=e287]:
+            - paragraph [ref=e288]: API Documentation
+            - paragraph [ref=e289]: API文档
+  - button "Initialize Session (8)" [ref=e291]:
+    - img [ref=e292]
+    - text: Initialize Session (8)

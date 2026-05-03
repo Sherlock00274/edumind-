@@ -1,0 +1,20 @@
+- generic [ref=e4]:
+  - generic [ref=e242]:
+    - heading "Account" [level=1] [ref=e243]
+    - paragraph [ref=e244]: Sign in to sync progress, history, and future reviews.
+    - generic [ref=e245]:
+      - generic [ref=e246]:
+        - button "Login" [ref=e247]
+        - button "Register" [ref=e248]
+      - textbox "Email" [ref=e249]: felix@example.com
+      - textbox "Password" [ref=e250]: password
+      - button "Login" [ref=e251]
+  - generic [ref=e100]:
+    - button [ref=e101]:
+      - img [ref=e103]
+    - button [ref=e106]:
+      - img [ref=e107]
+    - button [ref=e112]:
+      - img [ref=e113]
+    - button [active] [ref=e114]:
+      - img [ref=e115]

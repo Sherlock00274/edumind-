@@ -1,0 +1,48 @@
+- generic [ref=e152]:
+  - generic [ref=e153]:
+    - heading "Define Scope" [level=1] [ref=e155]
+    - paragraph [ref=e156]: Select the concepts you want to master today.
+  - generic [ref=e157]:
+    - generic [ref=e158]:
+      - img [ref=e160]
+      - generic [ref=e165]:
+        - 'heading "Lecture 3: Search" [level=3] [ref=e166]'
+        - generic [ref=e167]: Root Node • 3 Nodes
+    - generic [ref=e168]:
+      - generic [ref=e170]:
+        - generic [ref=e172]:
+          - button [ref=e173]:
+            - img [ref=e174]
+          - button [ref=e176]:
+            - img [ref=e177]
+          - generic [ref=e180] [cursor=pointer]:
+            - heading "Search Algorithms" [level=4] [ref=e181]
+            - generic [ref=e183]: 2/2
+        - generic [ref=e184]:
+          - generic [ref=e185] [cursor=pointer]:
+            - img [ref=e190]
+            - generic [ref=e193]:
+              - paragraph [ref=e194]: A* Search
+              - paragraph [ref=e195]: A*搜索
+          - generic [ref=e196] [cursor=pointer]:
+            - img [ref=e201]
+            - generic [ref=e204]:
+              - paragraph [ref=e205]: Breadth-First Search (BFS)
+              - paragraph [ref=e206]: 广度优先搜索
+      - generic [ref=e207]:
+        - generic [ref=e209]:
+          - button [ref=e210]:
+            - img [ref=e211]
+          - button [ref=e213]:
+            - img [ref=e214]
+          - generic [ref=e217] [cursor=pointer]:
+            - heading "Heuristics" [level=4] [ref=e218]
+            - generic [ref=e220]: 1/1
+        - generic [ref=e222] [cursor=pointer]:
+          - img [ref=e227]
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: Admissible Heuristic
+            - paragraph [ref=e232]: 可采纳启发式
+  - button "Initialize Session (3)" [ref=e234]:
+    - img [ref=e235]
+    - text: Initialize Session (3)

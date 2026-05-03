@@ -1,0 +1,205 @@
+          CSIT5900 Lecture 1: Introduction
+
+
+           Department of Computer Science and Engineering
+           Hong Kong University of Science and Technology
+
+
+
+
+(HKUST)                  Lecture 1: Introduction            1 / 12
+What is AI?
+
+
+According to John McCarthy, one of the founders of AI:
+
+
+                           “It is the science and engineering of mak-
+                           ing intelligent machines, especially intelli-
+                           gent computer programs. It is related to
+                           the similar task of using computers to un-
+                           derstand human intelligence, but AI does
+                           not have to confine itself to methods that
+                           are biologically observable.”
+
+
+
+
+        (HKUST)              Lecture 1: Introduction                       2 / 12
+                            What is AI?
+Are the following AI systems:
+    A calculator?
+    ChatGPT?
+    An OS like iOS or Windows?
+    An editor like Word or Emacs?
+
+
+
+
+        (HKUST)                 Lecture 1: Introduction   3 / 12
+Three Aspects of AI
+ 1   What motivate AI researchers? What are their long term goal?
+       ▶ AI researchers want to make machines (esp. computer programs) that
+         can do things (for humans) which so far can only be done by humans.
+       ▶ In terms of computer science, AI is in the forefront of computer
+
+         applications.
+       ▶ AI’s long term goal is to build machines that can sense, think, and act
+
+         intelligently.
+ 2   What are the techniques and algorithms that have come out of AI?
+       ▶    Heuristic search algorithms, knowledge representation languages and
+            reasoners, machine learning algorithms, etc.
+ 3   What are the impacts of AI?
+       ▶ On other science and engineering: math, physics, chemistry, biology,
+         etc
+       ▶ On our everyday life
+       ▶ On humanity in general
+
+
+
+
+           (HKUST)                Lecture 1: Introduction                         4 / 12
+Course Objectives
+
+
+
+
+  1   Understand AI’s challenges and long term goals.
+  2   Learn fundamental AI techniques and algorithms, not just the current
+      popular ones.
+  3   Appreciate AI problem solving methodology.
+
+
+
+
+         (HKUST)               Lecture 1: Introduction                  5 / 12
+Syllabus
+
+
+    Designing simple agents (using machine learning, rule-based systems,
+    machine evolution)
+    Search (heuristic search, CSP, game tree search, MDP)
+    Multiagent systems (game theory and auction)
+    Knowledge representation and reasoning
+    Uncertainty in AI
+    Generative AI
+Other course information - see canvas
+
+
+
+
+        (HKUST)              Lecture 1: Introduction                  6 / 12
+How It Got Started
+
+
+
+                         Ada Lovelace (1815 - 1852), the only
+                         child of the poet Lord Byron.
+
+
+
+
+   Her note G describes an algorithm for Babbage’s Analytical Engine to
+   compute Bernoulli numbers, and was considered to be the first
+   published computer program.
+   She wrote that “The Analytical Engine has no pretensions whatever
+   to originate anything. It can do whatever we know how to order it to
+   perform. It can follow analysis; but it has no power of anticipating
+   any analytical relations or truths.”
+      (HKUST)               Lecture 1: Introduction                  7 / 12
+How It Got Started
+
+
+
+
+                            Alan Turing (1912 - 1954), the father of
+                            computer science.
+
+
+
+
+Alan Turing. Computing machinery and intelligence. Mind, 59:433-460,
+1950.
+    “I propose to consider the question, ’Can machines think?’ This
+    should begin with definitions of the meaning of the terms ’machine’
+    and ’think.”’
+
+
+        (HKUST)               Lecture 1: Introduction                     8 / 12
+How It Got Started
+The Dartmouth Conference (1956): proposed by John McCarthy, Marvin
+Minsky, Nathaniel Rochester, and Claude Shannon:
+    We propose that a 2 month, 10 man study of artificial intelligence
+    be carried out during the summer of 1956 at Dartmouth College in
+    Hanover, New Hampshire. The study is to proceed on the basis of
+    the conjecture that every aspect of learning or any other feature
+    of intelligence can in principle be so precisely described that a
+    machine can be made to simulate it.
+Here was for the first time the term “artificial intelligence” was used
+(coined by McCarthy).
+
+  More, McCarthy,                 Shannon, McCarthy,
+
+  Minsky, Selfridge,              Ed     Fredkin    and
+
+  Solomonoff                      Joseph Weizenbaum
+
+  (2006)                          (1966)
+
+
+
+
+             (HKUST)           Lecture 1: Introduction                    9 / 12
+Some Influential AI Systems
+
+   Marvel (1992) - a real-time expert system that monitors the massive
+   stream of data from the Voyager spacecraft, handling routine tasks,
+   and alerting the analysts to more serious problems at JPL.
+   Pegasus (1994) - a speech understanding program that handles airline
+   ticket reservations.
+   An AI planning and scheduling system employed by US military
+   during the Gulf War. (DARPA later reported that the savings resulted
+   from using this single AI system had paid back the US Government all
+   its investment on AI during the past 20 years.)
+   Deep Blue (1997), AlphaGo (2016) and AlphaGo Zero (2017), IBM
+   Watson (2011), BERT (2018), GPT-3 (2020), AlphaFold (2020),
+   ChatGPT (2022), DeepSeak (2024), GPT5 (2025), pi-zero (2024),...
+
+
+      (HKUST)               Lecture 1: Introduction                 10 / 12
+New Problem Solving Methdology Using Generative AI
+
+      AI is the science and engineering of making intelligent computer
+      programs, the frontier of computer applications.
+      AI gives you new ways to solve problems on computer: new
+      methodologies, new algorithms, etc.
+Write a python program that accepts a text file of either Chinese or
+English and outputs the following:
+  1   The total number of words (Chinese characters) in the file
+  2   The line numbers of the shortest and longest lines, respectively, in the
+      file
+  3   The number of lines that contain all of the words in one of the
+      shortest lines.
+How do you think you would solve the problem two years ago? How about
+now? Would GPT4 or CoPilot help?
+
+         (HKUST)                Lecture 1: Introduction                    11 / 12
+Open Discussion
+
+   How smart is today’s AI? How do you make it smarter?
+   AI Dream? ”AI inspires dreams of computerized personal assistants
+   intertwined in every facet of our lives. The new technology will handle
+   our transportation, help teach our children, provide routine medical
+   care, create entertainment, and manage daily household errands and
+   chores.” ©2025 Bloomberg L.P.
+   AI means the end of the humanity?
+   AI 2027 https://ai-2027.com
+   The ’godfather of AI’ (Hinton) reveals the only way humanity can
+   survive superintelligent AI https:
+   //edition.cnn.com/2025/08/13/tech/ai-geoffrey-hinton
+
+
+
+      (HKUST)                Lecture 1: Introduction                   12 / 12
+

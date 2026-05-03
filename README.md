@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# EduMind
 
-# Run and deploy your AI Studio app
+EduMind is an adaptive learning system for final exam preparation.
 
-This contains everything you need to run your app locally.
+The repository is split into two application folders:
 
-View your app in AI Studio: https://ai.studio/apps/918cc014-0e4b-4d3c-b45e-9ced113e1413
+- `frontend/`: Vite + React mobile-first learning UI.
+- `backend/`: Python + FastAPI backend architecture and API service.
 
-## Run Locally
+Project-level design guidance lives in `docs/`.
 
-**Prerequisites:**  Node.js
+## Run Frontend
 
+```bash
+cd frontend
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Run Backend
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+uvicorn app.main:app --reload --port 8000
+```
+
+## Architecture
+
+Read [docs/backend-guidance.md](docs/backend-guidance.md) for the backend system design, data model, API contract, risk controls, and MVP implementation order.

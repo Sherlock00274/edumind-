@@ -1,0 +1,22 @@
+- generic [ref=e4]:
+  - generic [ref=e119]:
+    - heading "Account" [level=1] [ref=e167]
+    - paragraph [ref=e168]: Sign in to sync progress, history, and future reviews.
+    - generic [ref=e136]:
+      - generic [ref=e169]:
+        - button "Login" [ref=e170]
+        - button "Register" [ref=e171]
+      - textbox "Name" [ref=e172]: Felix Wang
+      - textbox "Email" [ref=e173]: felix@example.com
+      - textbox "Password" [ref=e174]: "123456"
+      - textbox "Subject" [ref=e175]: Computer Science
+      - button "Create Account" [ref=e176]
+  - generic [ref=e100]:
+    - button [ref=e101]:
+      - img [ref=e103]
+    - button [ref=e106]:
+      - img [ref=e107]
+    - button [ref=e112]:
+      - img [ref=e113]
+    - button [ref=e114]:
+      - img [ref=e115]

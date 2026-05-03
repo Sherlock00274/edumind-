@@ -1,0 +1,56 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e11]: "Status: In Loop"
+        - heading "EduMind." [level=1] [ref=e12]
+      - img "Avatar" [ref=e14] [cursor=pointer]
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - img [ref=e18]
+        - generic [ref=e20]:
+          - generic [ref=e21]: "0"
+          - generic [ref=e22]: Active Concepts
+      - generic [ref=e23]:
+        - img [ref=e25]
+        - generic [ref=e31]:
+          - generic [ref=e32]: 0%
+          - generic [ref=e33]: Mastery
+    - button "Create Course Start with syllabus" [ref=e35]:
+      - generic [ref=e36]:
+        - img [ref=e38]
+        - generic [ref=e41]:
+          - heading "Create Course" [level=3] [ref=e42]
+          - paragraph [ref=e43]: Start with syllabus
+    - generic [ref=e44]:
+      - heading "Active Roadmap" [level=3] [ref=e45]: Active Roadmap
+      - button "Insights ↗" [ref=e47]
+    - generic [ref=e55]:
+      - generic [ref=e57]:
+        - img [ref=e59]
+        - generic [ref=e62]:
+          - heading "No Course Yet" [level=4] [ref=e63]
+          - generic [ref=e64]
+        - img [ref=e68]
+      - generic [ref=e72]:
+        - generic [ref=e73]: Retained Mastery
+        - generic [ref=e74]: 0%
+    - generic [ref=e76]:
+      - heading "Recent Activity" [level=3] [ref=e77]
+      - generic [ref=e79] [cursor=pointer]:
+        - img [ref=e81]
+        - generic [ref=e83]:
+          - heading "No Course Created" [level=5] [ref=e84]
+          - paragraph [ref=e85]: Upload syllabus to build course
+        - generic [ref=e86]:
+          - generic [ref=e87]: "0"
+          - generic [ref=e88]: Weak
+  - generic [ref=e89]:
+    - button [ref=e90]:
+      - img [ref=e92]
+    - button [ref=e95]:
+      - img [ref=e96]
+    - button [ref=e101]:
+      - img [ref=e102]
+    - button [ref=e103]:
+      - img [ref=e104]

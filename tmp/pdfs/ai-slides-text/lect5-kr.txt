@@ -1,0 +1,1102 @@
+                    CSIT 5900
+Knowledge Representation, Reasoning and Constraint
+              Satisfaction Problems
+
+
+             Department of Computer Science and Engineering
+             Hong Kong University of Science and Technology
+
+
+
+
+   (HKUST)                      Reasoning                     1 / 60
+Agents That Reason Logically
+
+The cat or the tiger?
+
+There are two rooms. Each of them is occupied by either a tiger or a cat,
+but not both. There is also a sign on the door of each room, and the signs
+are either both true or both false. Here are the signs:
+
+ Room I                        Room II
+ either a tiger is
+ in this room or a             a cat is in the
+ cat is in the other           other room
+ room
+
+What does Room I contain? How about Room II?
+
+
+
+        (HKUST)                   Reasoning                            2 / 60
+Agents That Reason Logically, Mathematically, and by
+Commonsense
+
+
+Given the following facts:
+  1   Lisa is not next to Bob in the ranking
+  2   Jim is ranked immediately ahead of a biology major
+  3   Bob is ranked immediately ahead of Jim
+  4   One of the women (Lisa and Mary) is a biology major
+  5   One of the women is ranked first
+What are possible rankings for the four people?
+
+
+
+
+         (HKUST)                   Reasoning                3 / 60
+Agents That Reason Dynamically
+
+A typical state in the Wumpus World:
+
+      Stench                Breeze
+4                                    PIT
+
+                   Breeze
+                                     Breeze
+3                  Stench   PIT
+                   Gold
+
+
+      Stench                Breeze
+2
+
+
+
+                   Breeze            Breeze
+1                           PIT
+     START
+
+        1            2        3        4
+
+
+
+
+         (HKUST)                           Reasoning   4 / 60
+Wumpus World
+
+    Initial state: the agent is in [1,1], facing east (up), and with one
+    arrow.
+    Goal: Get the gold and return to [1,1] and climb out of the cave.
+    Percepts: given by an array of five sensors
+    [Stench,Breeze,Glitter,Bump,Scream]. Notice that the agent does not
+    know where she is – the agent was put in a cell, and she call that cell
+    [1,1].
+    Actions: grab the gold; turn 90 degree clockwise; turn 90 degree
+    counter clockwise; move forward to the next cell; shoot the arrow in
+    the direction that it is facing.
+Question: How can the agent figure out that [2,2] are safe to go into?
+
+
+
+        (HKUST)                    Reasoning                               5 / 60
+Agents That Reason about Other Agents Logically
+
+
+
+Sarah (the girl) and Ted (the boy) came home from playing outside.
+    The mother (to both children): At least one of your foreheads is dirty.
+    The boy: I don’t know if mine is dirty.
+    The girl: My forehead is dirty.
+    The boy: My forehead is dirty.
+How do they know?
+
+
+
+
+        (HKUST)                   Reasoning                             6 / 60
+Knowledge-Based Agents
+
+
+Two main components:
+   Knowledge base
+      I The collection of known facts about the world.
+      I Each item, called a sentence, expressed in some representation
+        language as a computer-tractable form.
+      I Should be updated over time.
+
+    Reasoning (or inference)
+      I Reasoning about knowledge in the KB to decide the best action to
+        achieve some given goal.
+      I Search algorithms that we have learnt can be used to carry out the
+
+        reasoning
+
+
+
+
+          (HKUST)                  Reasoning                                 7 / 60
+Knowledge Representation and Reasoning
+Knowledge representation is about how to represent things that are needed
+to solve a problem on a computer:
+    A KR language has two components: its syntax and semantics.
+    (Compare it with computer programming language.)
+    Syntax determines what are legal expressions (sentences) and
+    semantics tells us the meaning of these legal expressions.
+    Good knowledge representation languages should be:
+       I    expressive and concise like natural languages
+       I    unambiguous and precise like formal languages.
+Logical inference: the process of deriving new sentences from old ones.
+
+Two common kinds of logic:
+    Propositional logic (also called Boolean logic)
+    First-order predicate logic (or simply first-order logic)
+
+           (HKUST)                    Reasoning                           8 / 60
+          Propositional Logic
+
+
+
+
+(HKUST)         Reasoning       9 / 60
+Language
+
+
+
+The language (syntax) of a logic describes how to form sentences.
+    This is like the syntax of a programming language. E.g. the syntax
+    of C says that ++x is a legal expression, but **x is not.
+To define a language, we need to define its available symbols and
+formation rules. The former are the basic building blocks (tokens). The
+latter describes how to form sentences from these symbols.
+
+
+
+
+        (HKUST)                   Reasoning                               10 / 60
+Language (Continued)
+Symbols:
+    Logical symbols (those whose meanings are fixed by the logic):
+    parentheses ”(” and ”)”, sentential connectives ¬, ∧, ∨, ⊃, ≡.
+    Non-logical symbols (those whose meanings depend on
+    interpretations): proposition symbols p1 , p2 , ....
+Formation rules:
+    a proposition symbol is a sentence
+    if α and β are sentences, so are (¬α), (α ∧ β), (α ∨ β), (α ⊃ β), and
+    (α ≡ β).
+     no other expressions are sentences
+Convention: the outermost parentheses can be dropped, and we shall use
+the following precedence orders for the connectives: ¬ 7→ ∧, ∨ 7→⊃7→≡.
+p ∨ ¬q ≡ q ⊃ r is (p ∨ (¬q)) ≡ (q ⊃ r ).
+
+        (HKUST)                  Reasoning                            11 / 60
+Example
+
+The suspect must be released from custody: R
+The evidence obtained is admissible: E
+The evidence obtained is inadmissible: ¬E
+The evidence obtained is admissible, and the suspect need not be released
+from custody: E ∧ (¬R)
+Either the evidence is admissible or the suspect must be released from
+custody
+Quiz: E ∨ R or (E ∨ R) ∧ ¬(E ∧ R)?
+The evidence is inadmissible, but the suspect need not be released from
+custody
+Quiz: How do we translate ”but”?
+
+
+
+        (HKUST)                   Reasoning                               12 / 60
+Semantics - Truth Conditions
+To specify semantics of a logic, we need to first assume an interpretation
+of the non-logical symbols in the language, and then define the meaning of
+logical symbols in terms of this interpretation.
+For propositional logic, an interpretation, often called a truth assignment,
+is a function from the set of propositional symbols in the language to the
+set of truth values {T , F }.
+Given such a truth assignment v , we can extend it to the set of sentences
+using the following truth table
+
+                  p   q   ¬p p ∧ q p ∨ q p ⊃ q p ≡ q
+                  T   T   F    T     T     T     T
+                  T   F   F    F     T     F     F
+                  F   T   T    F     T     T     F
+                  F   F   T    F     F     T     T
+
+
+        (HKUST)                    Reasoning                             13 / 60
+Entailment
+
+We say a truth assignment v satisfies a sentence α iff v (α) = T .
+We say that a set of sentences Σ (tautologically) implies α, written Σ |= α,
+iff every truth assignment that satisfies every member of Σ also satisfies α.
+We say that a sentence α is a tautology (valid), written |= α, iff it is
+implied by the empty set of sentences, i.e. ∅ |= α.
+Tautologies are all we care about because of the following deduction
+theorem:
+Theorem {α1 , ..., αn } |= α iff |= α1 ∧ · · · ∧ αn ⊃ α.
+Sketch of proof. Only if case: Suppose v is a truth assignment. There
+are two cases: (1) v does not satisfies α1 ∧ · · · ∧ αn . In this case, v
+trivially satisfies α1 ∧ · · · ∧ αn ⊃ α. (2) v satisfies α1 ∧ · · · ∧ αn . So v also
+satisfies every member of {α1 , ..., αn }. By the assumption that
+{α1 , ..., αn } |= α, v satisfies α as well.
+If case: Similar.
+
+         (HKUST)                      Reasoning                                 14 / 60
+Example Tautologies
+
+De Morgan’s laws:
+¬(p ∧ q) ≡ ¬p ∨ ¬q and ¬(p ∨ q) ≡ ¬p ∧ ¬q
+Distributive laws:
+p ∧ (q ∨ r ) ≡ (p ∧ q) ∨ (p ∧ r ) and p ∨ (q ∧ r ) ≡ (p ∨ q) ∧ (p ∨ r )
+Excluded middle: p ∨ ¬p
+Contradiction: ¬(p ∧ ¬p)
+Contraposition: p ⊃ q ≡ ¬q ⊃ ¬p
+Exportation: p ∧ q ⊃ r ≡ p ⊃ (q ⊃ r )
+Tautologies that use ¬ and ∨ to define all other connectives:
+p ∧ q ≡ ¬(¬p ∨ ¬q)                   p ⊃ q ≡ ¬p ∨ q
+(p ≡ q) ≡ (p ⊃ q) ∧ (q ⊃ p)
+Quiz: Is ((p ⊃ q) ⊃ p) ⊃ q a tautology?
+How about ((p ⊃ q) ⊃ p) ⊃ p?
+
+
+        (HKUST)                     Reasoning                             15 / 60
+Applications: Query Answering
+
+
+Suppose: if it is sunny, then you get mail; if it is either rain or sleet, then
+you still get mail. It will be either raining or sunny tomorrow, would you
+get mail?
+Axiomatization:
+     Propositions: Rain, Sunny , Sleet, Mail.
+     KB: Rain ∨ Sunny         Sunny ⊃ Mail        (Rain ∨ Sleet) ⊃ Mail.
+     Query: Does KB |= Mail?
+Class exercise: The tiger or the cat problem.
+
+
+
+
+         (HKUST)                     Reasoning                               16 / 60
+Applications: Problem Solving by Finding Models
+Consider the graph coloring problem: you have three colors, say black,
+white, and gray, and you want to assign a color to every node in a graph
+such that no adjacent nodes have the same color.
+Axiomatization:
+    Propositions: n(c), for each node n, and each color c, adj(n1 , n2 ), for
+    every pair of nodes.
+    Axioms:
+       I    Each node must have exactly one color assigned to it: for each node n,
+                     [n(b) ∨ n(w ) ∨ n(g )] ∧ [n(b) ⊃ (¬n(w ) ∧ ¬n(g ))] ∧
+                          [n(w ) ⊃ (¬n(b) ∧ ¬n(g ))] ∧ [n(g ) ⊃ (¬n(w ) ∧ ¬n(b))]
+       I    No adjacent nodes can have the same color:
+            adj(n1 , n2 ) ⊃ ¬(n1 (b) ∧ n2 (b)) ∧ ¬(n1 (w ) ∧ n2 (w )) ∧ ¬(n1 (g ) ∧ n2 (g )).
+       I    A database of adj(n1 , n2 ) facts,
+Now every model of the above theory is a coloring of the graph.
+Constraint Satisfaction Problems (CSP) and Satisfiability (SAT) - later
+           (HKUST)                        Reasoning                                      17 / 60
+Clausal Representation
+
+
+
+
+    Represent a formula (boolean function) by a set of clauses.
+    A clause is a disjunction of literals: l1 ∨ · · · ∨ lk .
+    A literal is either proposition symbol (variable) (positive literal) or its
+    negation (negative literal).
+
+
+
+
+        (HKUST)                       Reasoning                             18 / 60
+CNF
+A set S of clauses is the conjunction of the clauses in S, thus denoting a
+sentence in Conjunctive Normal Form (CNF): a Conjunction of
+disjunctions of literals.
+Every sentence α can be converted into a CNF α0 in such a way that
+|= α ≡ α0 :
+  1   eliminate ⊃ and ≡ using
+      α ≡ β ⇒ (α ⊃ β) ∧ (β ⊃ α) and α ⊃ β ⇒ ¬α ∨ β
+  2   push ¬ inside using
+      ¬(α ∧ β) ⇒ ¬α ∨ ¬β and ¬(α ∨ β) ⇒ ¬α ∧ ¬β
+  3   distribute ∨ over ∧ using
+      (α ∧ β) ∨ γ ⇒ (α ∨ γ) ∧ (β ∨ γ)
+  4   simplifying items using
+      α ∨ α ⇒ α and ¬¬α ⇒ α.
+  5   eliminate disjunctions that contain both a literal and its compliment.
+         (HKUST)                    Reasoning                             19 / 60
+Example
+
+
+      ((p ⊃ q) ⊃ p) ⊃ q ⇒ ¬((p ⊃ q) ⊃ p) ∨ q
+                       ⇒ ¬(¬(p ⊃ q) ∨ p) ∨ q
+                       ⇒ ¬(¬(¬p ∨ q) ∨ p) ∨ q
+                       ⇒ ¬((¬¬p ∧ ¬q) ∨ p) ∨ q
+                       ⇒ (¬(¬¬p ∧ ¬q) ∧ ¬p) ∨ q
+                       ⇒ ((¬¬¬p ∨ ¬¬q) ∧ ¬p) ∨ q
+                       ⇒ (¬¬¬p ∨ ¬¬q ∨ q) ∧ (¬p ∨ q)
+                       ⇒ (¬p ∨ q) ∧ (¬p ∨ q)
+                       ⇒    clausal form representation:
+                           {¬p ∨ q}
+
+
+     (HKUST)               Reasoning                       20 / 60
+Resolution Rule of Inference
+
+
+
+Given two clauses, infer a new clause:
+from clauses p ∨ C1 and ¬p ∨ C2
+infer clause C1 ∨ C2 . This new clause is called the resolvent of input
+clauses with respect to p.
+Example: from clauses w ∨ p ∨ q and w ∨ s ∨ ¬p infer w ∨ q ∨ s as
+resolvent wrt p.
+Special case: p and ¬p resolve to [] (the empty clause, false,
+contradiction).
+
+
+
+
+        (HKUST)                    Reasoning                              21 / 60
+Properties of Resolution
+
+
+
+    Resolvent is entailed by input clauses:
+
+                         {(p ∨ α), (¬p ∨ β)} |= α ∨ β
+
+    More generally, if S → c then S |= c.
+    Special case: If S → [], then S |= FALSE , i.e. S is unsatisfiable, that
+    is, there is no truth assignment that satisfies every member of S.
+
+
+
+
+       (HKUST)                    Reasoning                              22 / 60
+Proof By refutation
+
+
+
+Resolution is sound and complete for []:
+Theorem S is unsatisfiable iff S → []
+This completeness is also called refutation complete, and is all we need:
+Σ |= α iff Σ ∪ {¬α} is unsatisfiable iff the CNF S of Σ ∪ {¬α} is
+unsatisfiable iff we can derive [] from S.
+Proving Σ |= α by checking the satisfiability of Σ ∪ {α} is often called
+proof by refutation.
+
+
+
+
+        (HKUST)                    Reasoning                                23 / 60
+A Procedure
+
+To determine if KB |= α:
+    put KB and ¬α into CNF to get S.
+    check if S → []:
+      1    check if [] is in S. If yes, then return ”unsatisfiable”
+      2    check if there are two clauses c1 and c2 in S such that they resolve to
+           produce a c3 not already in S. If no such c3 can be generated, then
+           return ”satisfiable”
+      3    add c3 to S and go back to the first step.
+Note: need only convert KB to CNF once:
+    can handle multiple queries with same KB
+    after addition of a new fact β, can simply add new clauses from β’s
+    CNF to KB
+
+
+
+          (HKUST)                     Reasoning                                 24 / 60
+An Example
+KB:
+
+                       FirstGrade, FirstGrade ⊃ Child, Child ∧ Male ⊃ Boy ,
+                       Kindergarden ⊃ Child, Child ∧ Female ⊃ Girl, Female.
+
+Show that KB |= Girl
+(In the following drawing, [l1 , l2 , ..., lk ] denotes the clause l1 ∨ l2 ∨ · · · ∨ lk )
+[FirstGrade]                          [~Child, ~Male, Boy]
+
+               [~FirstGrade, Child]                 [~Kindergarden, Child]
+
+                     [~Child, ~Female, Girl]
+  [Child]
+                                       [Female]
+                                                             [~Girl] (negation of query)
+            [~Female, Girl]
+
+
+                         [Girl]
+                                               []
+
+
+                (HKUST)                                       Reasoning                    25 / 60
+An Example
+
+
+KB: Rain ∨ Sun                    Sun ⊃ Mail                  (Rain ∨ Sleet) ⊃ Mail
+Show KB |= Mail
+[Rain, Sun] [~Sun, Mail] [~Rain, Mail] [~Sleet, Mail] [~Mail] (negation of goal)
+
+
+
+                        [~Sun]                  [~Rain]
+
+
+          [Rain]
+
+                                 []
+
+We can also show that KB 6|= Rain by enumerating all possible derivations.
+
+
+
+
+              (HKUST)                                     Reasoning                   26 / 60
+Satisfiability
+    A clause is a disjunction of literals - a literal is a variable or the
+    negation of a variable.
+    Satisfiability (SAT) refers to the problem of deciding if a set of
+    clauses is satisfiable. It was the first NP-complete problem discovered
+    by Cook, it is also one of the most intensely studied NP-complete
+    problem.
+    There is a huge literature on SAT. SAT algorithms have many
+    applications.
+    3SAT refers to the problem of deciding if a set of clauses that have
+    no more than 3 literals is satisfiable.
+    In terms of computational complexity, SAT is equivalent to 3SAT.
+    A procedure for SAT is sound if whenever it returns yes, the input is
+    indeed satisfiable; it is complete if it will return yes whenever the
+    input is satisfiable. Obviously, we want only sound procedures. But
+    incomplete ones can sometimes be very useful.
+        (HKUST)                     Reasoning                                27 / 60
+Constraint Satisfaction Problem (Assignment Problem)
+
+
+Problem definition:
+    A finite set of variables and their domains.
+    A finite set of conditions on these variables.
+    A solution is an assignment to these variables that satisfies all the
+    conditions.
+Example: 8-queens problem:
+    Variables: q1 , ..., q8 , the position of a queen in column 1,...,8.
+    Domain: the same for all variables, {1, .., 8}.
+    Constraints: q1 − q2 6= 0, |q1 − q2 | 6= 1,...
+
+
+
+
+        (HKUST)                     Reasoning                               28 / 60
+Constructive Methods
+
+
+Constructive methods use search strategies, especially depth-first search,
+to try to find a solution:
+    States: any partial assignment (assign values to some of the
+    variables).
+    Initial state: the empty assignment.
+    Operator: pick a new variable, and assign a value in its domain to it.
+    Path cost: 0.
+    Goal condition: when all constraints are satisfied.
+
+
+
+
+        (HKUST)                    Reasoning                             29 / 60
+Constraint Propagation
+
+   A technique called constraint propagation can be used to prune the
+   search space: given the current partial assignment, one can use the
+   constraints to narrow down the search, i.e. eliminate some possible
+   values of the remaining variables.
+   How to do this depends on the type of constraints.
+   An example using SAT (plus dependency-based backtracking and
+   conflict-clause learning) will be given later.
+   The next few slides illustrate the idea using 4-Queen Problem and
+   constraint graphs constructed using constraints involving two
+   variables: A constraint graph is one where a node is labelled by a
+   variable and the domain that the variable can take, and there is an
+   edge from node i to j if the variable i and j are constrainted.
+
+
+      (HKUST)                   Reasoning                                30 / 60
+Running Example: 4-Queens Problem
+Constraint graph:
+                                   q1
+
+
+                           {1, 2, 3, 4}
+
+
+
+      q2                                      q3
+
+
+ {1, 2, 3, 4}                             {1, 2, 3, 4}
+
+
+
+
+                           {1, 2, 3, 4}
+
+
+                                   q4
+© 1998 Morgan Kaufman Publishers
+               (HKUST)                             Reasoning   31 / 60
+Running Example: 4-Queens Problem
+Constraint graph with q1 = 1:
+                                   q1
+
+
+                                   {1}
+
+
+
+      q2                                      q3
+
+
+   { 3 , 4}                                {2, 4}
+
+
+
+
+                              {2, 3}
+
+
+                                   q4
+
+    Values eliminated by first making arc (q 2, q 3)
+    and then arc (q 3, q 2) consistent
+    Value eliminated by next making arc (q 3, q 4) consistent
+© 1998 Morgan Kaufman Publishers
+
+
+
+                   (HKUST)                                      Reasoning   32 / 60
+Running Example: 4-Queens Problem
+Constraint graph with q = 2:
+                                   q1
+
+
+                                   {2}
+
+
+
+      q2                                       q3
+
+
+      {4}                                    {1, 3 }
+
+
+
+
+                           { 1 , 3, 4 }
+
+
+                                   q4
+
+    Value eliminated by first making arc (q 3, q 2) consistent
+    Value eliminated by next making arc (q 4, q 3) consistent
+    Value eliminated by next making arc (q 4, q 2) consistent
+© 1998 Morgan Kaufman Publishers
+
+
+                   (HKUST)                                       Reasoning   33 / 60
+Constructive Method in SAT
+The most popular and widely studied complete method for SAT is the so
+called Davis-Putnam-Longemann-Loveland (DPLL) procedure - which is
+the constructive method for CSP applied to SAT.
+Let α be a set of clauses. If l is a literal occurring in α, then by α(l), we
+mean the result of letting l true and simplifying: if a clause C does not
+mention l and ¬l, then do nothing; if C mention l, then eliminate it; if C
+mention ¬l, then delete ¬l from C .
+     Procedure DPLL(CNF: α)
+          if α is empty, then return yes.
+          else if there is an empty clause in α, return no.
+          else if there is a pure literal l in α, then return DPLL(α(l)).
+          else if there is a unit clause {l} in α, then return DPLL(α(l)).
+          else select a variable p in α, and do the following
+                  if DPLL(α(p)) return yes, then return yes.
+                  else return DPLL(α(¬p)).
+Where a literal in α is pure if it occurrs only positively or negatively, and a
+unit clause is one whose length is 1.
+        (HKUST)                          Reasoning                           34 / 60
+Modern DPLL
+The state-of-art SAT solvers: DPLL + constraint propogation + conflict
+driven clause learning + dependency-based backtracking:
+  1   Start with the empty assignment.
+  2   If all variables are assigned then return with the assignment.
+  3   Choose an assignment for an un-assigned variable (backtrack point).
+  4   Propagate (deduce) the extended partial assignment.
+  5   If propagate yields a contradiction:
+        I analyze the conflict to learn some new clauses
+          (conflict driven clause learning)
+        I backtrack to the nearest backtrack point that is relevant to the conflict.
+        I exit with failure (unsatisfiable) if backtrack returns no new alternatives.
+
+  6   Else go back to step 2.
+See https:
+//en.wikipedia.org/wiki/Conflict-Driven_Clause_Learning for
+more details.
+            (HKUST)                    Reasoning                                 35 / 60
+GSAT
+Incomplete methods cannot be used to check unsatisfiable CNFs. But on
+satisfiable CNFs, incomplete methods can sometimes be much faster than
+the currently known best complete methods.
+The following randomized local search algorithm, often called GSAT, is
+typical of current best known incomplete methods:
+      Procedure GSAT(CNF: α, max-restart: mr, max-climb: mc)
+         for i = 1 to mr do
+               get a randomly generated truth assignment v .
+               for j = 1 to mc do
+                     if v satisfies α, return yes
+                     else let v be a random choice of one the best successors of v
+         return failure
+where a successor of v is an assignment with the truth value of one of the
+variables flipped, and a best successor is one that satisfies maximum
+number of clauses in α.
+
+        (HKUST)                     Reasoning                                  36 / 60
+Heuristic Repair
+
+
+    GSAT is a local search method that belongs to Heuristic repair class
+    of methods in CSP.
+    In CSP, constructive methods starts with empty assignment, and build
+    up a solution gradually by assigning values to variables one by one.
+    Heuristic repair starts with a proposed solution, which most probably
+    does not satisfy all constraints,and repair it until it does.
+    An often used, so-called min-conflicts repair method by Gu will select
+    a variable for adjust, and find a value that minimizes conflicts - see
+    the following example on 8-Queens.
+
+
+
+
+       (HKUST)                   Reasoning                             37 / 60
+8-Queens By Min-Conflicts
+2         x
+0
+x2      x
+1             x
+3   x
+2 x
+4           x
+1     x
+
+
+
+                               2       x
+ Move                        x 2
+ (1,3) to (1,2)                2     x
+                               2           x
+                               3 x
+                               x3
+                               1         x
+                               1   x
+
+
+
+      2     x
+x     1                              Move (2,6)
+      2   x                          to (2,7)
+      2         x
+      x1
+      1
+    x 3       x
+      2 x
+
+
+                                       2   x
+ No change                   x         2
+                                       2 x
+                                       4       x
+                                     x 3
+                                       1
+                                   x   2     x
+                                       x1
+
+© 1998 Morgan Kaufman Publishers
+
+
+                    (HKUST)                        Reasoning   38 / 60
+Unsupervised Learning (Clustering and K-Mean via CSP)
+
+
+
+   Unsupervised learning, by its name, can be about any learning
+   methods that do not need explicitly labeled examples.
+   However, it often refers to those clustering methods that take input
+   Dt to be a set of input x without labels y .
+   Reinforcement learning, while needing no explicitly labeled data, is
+   considered on its own (samples are generated dynamically and under
+   the control of the agent).
+
+
+
+
+      (HKUST)                   Reasoning                             39 / 60
+Example 1: English word clustering
+Brown et al 1992:
+    Input: a (large) corpus of words (100 million words of news articles)
+    Output: Clusters of words, for example:
+       1    Friday Monday Thursday Wednesday Tuesday Saturday Sunday
+            weekends Sundays Saturdays
+       2    June March July April January December October November
+            September August
+       3    people guys folks fellows CEOs chaps doubters commies unfortunates
+            blokes
+       4    down backwards ashore sideways southward northward overboard aloft
+            downwards adrift
+       5    water gas coal liquid acid sand carbon steam shale iron
+       6    great big vast sudden mere sheer gigantic lifelong scant colossal
+       7    man woman boy girl lawyer doctor guy farmer teacher citizen
+       8    American Indian European Japanese German African Catholic Israeli
+            Italian Arab
+It’s often called Brown clustering or IBM clustering, and used to be a
+corner stone of NLP systems.
+           (HKUST)                   Reasoning                              40 / 60
+Example 2: Image clustering
+
+Feature learning using neural networks clusters 10 million images (from
+YouTube stills) into 22 thousands categories:
+
+
+
+
+                     Figure: From Percy Liang’s AI note
+
+
+
+
+        (HKUST)                   Reasoning                               41 / 60
+Clustering
+
+
+Given a training set of inputs Dt = {x1 , ..., xn }, classify them into a unique
+cluster in {C1 , ..., CK }.
+     A CSP problem?
+     Variables: c1 ,...,cn .
+     Domains: {1, ..., K } (ci = j means that the ith input xi is assigned to
+     cluster j.
+     Constraints?
+Intuition: “Similar” inputs should get the same assignment.
+
+
+
+
+         (HKUST)                    Reasoning                                42 / 60
+K-means
+
+K-means clustering: “similar” = close in distance, and each cluster i is
+represented by a centroid µi .
+K-means clustering CSP:
+    Variables: c1 ,...,cn , µ1 ,...,µK .
+    Domains: {1, ..., K } for ci and the feature space for µi (i.e. the
+               ~
+    domain for φ(x)).
+    Constraints: minimize the following
+                                   n
+                                   X
+                                           k~
+                                            φ(xi ) − µci k2 .
+                                   i=1
+
+
+
+
+        (HKUST)                            Reasoning                       43 / 60
+K-means - example
+Consider Dt with four examples whose feature space is one dimensional
+numbers:
+                         ~
+                         φ(Dt ) = {1, 2, 10, 11}.
+and K=2, meaning we want to have two clusters. Clearly the solution is
+
+                  c1 = c2 = 1, c3 = c4 = 2, µ1 = 1.5, µ2 = 10.5.
+
+Insight: c~ and ~
+                µ: knowing one makes the other easily computed:
+    Given µ1 = 1.5, µ2 = 10.5,
+
+                             c1 = arg mini (1 − µi )2 = 1.
+
+    Given c1 = c2 = 1, c3 = c4 = 2,
+
+                        µ1 = minα (1 − α)2 + (2 − α)2 = 1.5.
+
+        (HKUST)                       Reasoning                         44 / 60
+K-means
+
+
+
+
+Algorithm - informal:
+  1   Initialize µ1 ,...,µK .
+  2   Iterate the following for T steps:
+        1    compute the best assignment c1 , ..., cn for the given µ.
+        2    computer the best centroids µ1 , ..., µK for the given c.
+
+
+
+
+            (HKUST)                      Reasoning                       45 / 60
+Problems with the propositional agents
+
+
+
+
+Problem: Too many propositions, and too many rules!
+
+Solution: onto first-order logic.
+
+
+
+
+         (HKUST)                    Reasoning         46 / 60
+First-Order Logic
+
+    Propositional logic is not expressive and concise enough – the world is
+    a set of facts according to it.
+    First-order logic (FOL) is more expressive than propositional logic.
+    According to FOL, the world consists of objects. The facts in the
+    world are simply properties about or relations among these objects.
+    First-order logic is universal - whatever can be said can be written
+    down in FOL, any fact can be thought of as referring to objects and
+    properties or relations:
+      I “one plus two equals three” – objects: one two, three, one plus two;
+        relation: equal.
+      I “squares neighboring the wumpus are smelly” – objects: wumpus,
+
+        squares; property: smelly; relation: neighboring.
+      I “evil King John ruled England in 1200”.
+
+
+
+
+          (HKUST)                  Reasoning                                   47 / 60
+Syntax - Alphabet
+Logical Symbols: fixed meaning and use, like keywords in a programming
+language
+     punctuations and parentheses.
+     connectives: ¬, ∧, ∨, ⊃, ≡.
+     quantifiers: ∀, ∃.
+     equality: =
+     variables: x, x1 , ..., x 0 , x 00 , ..., y , ..., z, ...
+Non-logical symbols: domain-dependent meaning and use, like identifiers
+in a programming language
+     predicate symbols: have arity, i.e. take fixed number of argument.
+     E.g. Dog is a 1-ary (unary) predicate, Dog (fido) means that Fido is a
+     dog. Propositional symbols are 0-ary predicates.
+     function symbols: have arity as well. E.g. plus is a 2-ary (binary)
+     function, plus(x, y ) means the sum of x and y . Constant symbols like
+     fido are 0-ary functions.
+        (HKUST)                   Reasoning                             48 / 60
+Syntax - Terms and Sentences
+A term is a logical expression that refers to an object:
+     a constant is a term.
+     a variable is a term.
+     if t1 , · · · , tn are terms, and f is an n-ary function symbol, then
+     f (t1 , ..., tn ) is a term.
+Example: fido, fatherOf (fido),fatherOf (fatherOf (fido)).
+fatherOf (firstChild(fido, motherOf (dido))).
+
+A sentence is a logical expression that represents a fact:
+    if t1 , · · · , tn are terms, and P is an n-ary predicate (relation) symbol,
+    then P(t1 , ..., tn ) is a sentence (atomic sentence).
+    if t1 and t2 are terms, then t1 = t2 is a sentence (atomic sentence).
+    if α and β are sentences, then ¬α, (α ∧ β), (α ∨ β), (α ⊃ β),
+    (α ≡ β) are also sentences.
+    if α is a sentence, and v is a variable, then (∀v α), (∃v α) are also
+    sentences.
+         (HKUST)                     Reasoning                               49 / 60
+Example Sentences
+
+   Atomic sentences: simple facts about the world. Examples:
+   Brother (richard, john),
+   fatherOf (richard) = fatherOf (john),
+   Student(firstChild(john, mary ), ust).
+   Quantifiers:
+     I    Universal quantification (∀):
+             F     General rules (for all objects in universe)
+             F     Example: ”COMP101 students are UST students.”
+                   ∀x Enrolled(x, comp101) ⊃ Student(x, hkust)
+     I    Existential quantification (∃):
+             F     For one or more objects in universe
+             F     Example: ”not all UST students enroll COMP101”
+                   ∃x Student(x, hkust) ∧ ¬Enrolled(x, comp101)
+
+
+
+
+         (HKUST)                        Reasoning                   50 / 60
+Example Sentences
+
+   Quantifiers
+     I    Nested quantifiers:
+             F     “brothers are also siblings”:
+
+                                      ∀x, y Brother (x, y ) ⊃ Sibling (x, y )
+
+               Here ∀x, y is a shorthand for ∀x∀y .
+             F “everybody loves somebody”: ∀x∃y Loves(x, y ).
+             F “a mother is someone who is a female and has a child”:
+
+
+                                ∀x [Mother (x) ≡ Female(x) ∧ ∃y Child(x, y )]
+     I    Relationships between ∀ and ∃:
+             F     ¬∃x P ≡ ∀x ¬P          ∃x ¬P ≡ ¬∀x P
+             F     ∀x P ≡ ¬∃x ¬P         ∃x P ≡ ¬∀x ¬P
+
+
+
+
+         (HKUST)                            Reasoning                           51 / 60
+Some Examples
+   All purple mushrooms are poisonous:
+
+                ∀x Mushroom(x) ∧ Purple(x) ⊃ Poisonous(x)
+
+   No purple mushroom is poisonous:
+
+                ∀x Mushroom(x) ∧ Purple(x) ⊃ ¬Poisonous(x)
+
+   All mushrooms are either purple or poisonous:
+
+                ∀x Mushroom(x) ⊃ Purple(x) ∨ Poisonous(x)
+
+   All mushrooms are either purple or poisonous but not both:
+
+                   ∀x     Mushroom(x) ⊃
+                          (Purple(x) ∧ ¬Poisonous(x)) ∨
+                          (¬Purple(x) ∧ Poisonous(x))
+
+      (HKUST)                   Reasoning                       52 / 60
+Examples
+
+   All purple mushrooms except one are poisonous:
+
+           ∃x    Purple(x) ∧ Mushroom(x) ∧ ¬Poisonous(x) ∧
+                 (∀y Purple(y ) ∧ Mushroom(y ) ∧ ¬(x = y ) ⊃
+                  Poisonous(y ))
+
+   There are exactly two purple mushrooms:
+
+       ∃x, y    Mushroom(x) ∧ Purple(x) ∧
+                Mushroom(y ) ∧ Purple(y ) ∧ ¬(x = y ) ∧
+                (∀z Mushroom(z) ∧ Purple(z) ⊃ (z = x) ∨ (z = y ))
+
+
+
+
+      (HKUST)                  Reasoning                            53 / 60
+Rule-Based Expert Systems
+
+   An expert system embodies knowledge about a specialized field such
+   as medicine, engineering, or business.
+   It is one of the most successful applications of AI reasoning
+   techniques.
+   Some well-known expert systems:
+     I DENDRAL (1965-83) - one of the earliest expert systems, molecular
+       structure analysis.
+     I MYCIN (1972-80) - one of the most influential expert system, medical
+
+       diagnosis.
+     I PROSPECTOR - a mining expert system.
+     I XCOM (R1) - a computer configuration system used in DEC.
+     I American Express Inc. loan processing expert system.
+
+
+
+
+         (HKUST)                 Reasoning                              54 / 60
+An Example
+Rule-based expert systems are often based on Horn clauses (clauses with
+exactly one positive literal). Consider the following loan-approval system:
+
+                  1.    COLLAT ∧ PYMT ∧ REP ⊃ OK
+                  2.    APP ⊃ COLLAT
+                  3.    RATING ⊃ REP
+                  4.    INC ⊃ PYMT
+                  5.    BAL ∧ REP ⊃ OK
+
+where OK means the loan should be approved, COLLAT the collateral for
+the loan is satisfactory, PYMT the applicant is able to make the loan
+payments, REP the applicant has a good financial reputation, APP the
+appraisal on the collateral is sufficiently larger than the loan amount,
+RATING the applicant has a good credit rating, INC the applicant’s
+income exceeds his/her expenses, and BAL the applicant has an excellent
+balance sheet.
+        (HKUST)                    Reasoning                             55 / 60
+Rule Learning
+
+
+
+
+   Rule-based expert systems are still widely used.
+   It takes a lot of effort to collect these rules from experts.
+   An automatic way of acquiring these rules will be very useful.
+   We describe an algorithm called generic separate-and-conquer
+   algorithm for learning propositional rules.
+
+
+
+
+      (HKUST)                     Reasoning                         56 / 60
+Loan-Approval Example
+Suppose we have following data from bank record:
+              Individual   APP   RATING       INC   BAL   OK
+                      1      1        0         0     1    0
+                      2      0        0         1     0    0
+                      3      1        1         0     1    1
+                      4      0        1         1     1    1
+                      5      0        1         1     0    0
+                      6      1        1         1     0    1
+                      7      1        1         1     1    1
+                      8      1        0         1     0    0
+                      9      1        1         0     0    0
+We want to find out rules about when to approve a loan, i.e. learn rules of
+the form:
+                           α1 ∧ · · · ∧ αn ⊃ OK
+where αi are atoms from the set {APP, RATING , INC , BAL}.
+        (HKUST)                   Reasoning                             57 / 60
+GSCA
+Generic Separate-Conquer Algorithm: Given an atom γ that we want to
+learn rules about, and Σ, a training set, GSCA works as follows:
+  1   Initialize Σcur = Σ.
+  2   Initialize π = empty set of rules.
+  3   repeat
+        1    Initialize Γ = true.
+        2    Initialize τ = Γ ⊃ γ.
+        3    repeat
+                1     Select an atom α from feature set. This is a nondeterministic step, and
+                      a backtracking point.
+                2     Let Γ be Γ ∧ α.
+        4    until τ covers only (or mainly) positive instances in Σcur .
+        5    Let π be π, τ (add the newly learned rule).
+        6    Let Σcur be Σcur - {the positive instances in Σcur covered by π}.
+  4   until π covers all (or most) of the positive instance in Σ.
+
+            (HKUST)                          Reasoning                                   58 / 60
+A Heuristic
+
+
+
+
+A common heuristic is to select a feature α that will yield the maximum
+value of rα = nα+ /nα , where nα is the total number of instances in Σcur
+that is covered by the new rule when α is added to Γ, and nα+ the total
+number of positive instances in Σcur that is covered by the new rule.
+
+
+
+
+        (HKUST)                   Reasoning                             59 / 60
+GSCA - The Loan-Approval Example
+   We began with the rule: true ⊃ OK .
+   It covers all instances, including all negative ones. So we have to narrow
+   them by adding a feature into its antecedent. We do that by choosing one
+   that yields the largest value of rα :
+   rAPP = 3/6 = 0.5, rRATING = 4/6 = 0.667, rINC = 3/6 = 0.5, rBAL = 3/4 = 0.75.
+   So we choose BAL, and generate the following rule: BAL ⊃ OK .
+   This rule still covers the negative instance 1, so we still need to narrow it.
+   This time we have:
+                       rAPP = 2/3, rRATING = 3/3, rINC = 2/2
+   so we can choose either RATING or INC . Suppose we choose RATING ,
+   then this yields the rule:
+                               BAL ∧ RATING ⊃ OK
+   This rule covers only positive instances, so we have learned one rule. To
+   learn the next one, we eliminate from the sample those rules already cover
+   by it, and continue like above, until no more positive instances are left with.
+       (HKUST)                       Reasoning                                  60 / 60
+

@@ -1,0 +1,45 @@
+- generic [ref=e4]:
+  - generic [ref=e119]:
+    - banner [ref=e120]:
+      - heading "Intelligence" [level=1] [ref=e121]
+      - button [ref=e122]:
+        - img [ref=e123]
+    - generic [ref=e126]:
+      - img "Avatar" [ref=e128]
+      - generic [ref=e129]:
+        - heading "Felix Wang" [level=2] [ref=e130]
+        - generic [ref=e131]:
+          - generic [ref=e132]: Level 1
+          - generic [ref=e133]:
+            - img [ref=e134]
+            - text: Computer Science
+    - generic [ref=e136]:
+      - button "Overview" [ref=e137]:
+        - img [ref=e138]
+        - generic [ref=e141]: Overview
+      - button "History" [ref=e142]:
+        - img [ref=e143]
+        - generic [ref=e147]: History
+      - button "Future" [ref=e148]:
+        - img [ref=e150]
+        - generic [ref=e152]: Future
+    - generic [ref=e153]:
+      - generic [ref=e154]:
+        - generic [ref=e155]:
+          - img [ref=e156]
+          - generic [ref=e159]: Backend Forecast
+        - heading "0 concepts queued for future review." [level=3] [ref=e160]
+        - paragraph [ref=e161]: Generated from weak concepts and scheduled review candidates.
+      - heading "Scheduled Reviews" [level=3] [ref=e162]:
+        - text: Scheduled Reviews
+        - img [ref=e163]
+      - generic [ref=e165]: No scheduled reviews yet.
+  - generic [ref=e100]:
+    - button [ref=e101]:
+      - img [ref=e103]
+    - button [ref=e106]:
+      - img [ref=e107]
+    - button [ref=e112]:
+      - img [ref=e113]
+    - button [active] [ref=e114]:
+      - img [ref=e115]

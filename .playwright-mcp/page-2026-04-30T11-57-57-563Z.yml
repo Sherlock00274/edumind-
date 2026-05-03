@@ -1,0 +1,74 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e11]: "Status: In Loop"
+        - heading "EduMind." [level=1] [ref=e12]
+      - img "Avatar" [ref=e14] [cursor=pointer]
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - img [ref=e18]
+        - generic [ref=e20]:
+          - generic [ref=e21]: "0"
+          - generic [ref=e22]: Active Concepts
+      - generic [ref=e23]:
+        - img [ref=e25]
+        - generic [ref=e31]:
+          - generic [ref=e32]: 0%
+          - generic [ref=e33]: Mastery
+    - generic [ref=e34]:
+      - button "Feed the Brain Ingest new materials" [active] [ref=e35]:
+        - generic [ref=e36]:
+          - img [ref=e38]
+          - generic [ref=e41]:
+            - heading "Feed the Brain" [level=3] [ref=e42]
+            - paragraph [ref=e43]: Ingest new materials
+      - generic [ref=e122]:
+        - generic [ref=e123]:
+          - textbox "Paste your lecture notes, article, or key points here..." [ref=e124]
+          - img [ref=e126]
+        - button "Process with Backend AI" [disabled] [ref=e129]:
+          - img [ref=e130]
+          - text: Process with Backend AI
+    - generic [ref=e44]:
+      - heading "Active Roadmap" [level=3] [ref=e45]: Active Roadmap
+      - button "Insights ↗" [ref=e47]
+    - generic [ref=e51]:
+      - generic [ref=e55] [cursor=pointer]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - img [ref=e59]
+            - generic [ref=e62]:
+              - heading "No Course Yet" [level=4] [ref=e120]
+              - generic [ref=e64]:
+                - generic [ref=e65]: 0 Concepts
+                - generic [ref=e66]: • 0 weak
+          - img [ref=e68]
+        - generic [ref=e71]:
+          - generic [ref=e72]: Retained Mastery
+          - generic [ref=e73]: 0%
+      - generic [ref=e77] [cursor=pointer]:
+        - generic [ref=e78]:
+          - img [ref=e80]
+          - generic [ref=e83]:
+            - heading "Knowledge Map" [level=5] [ref=e84]
+            - paragraph [ref=e85]: Review current backend concepts
+        - img [ref=e87]
+      - generic [ref=e94]: Upload material to create more concepts
+    - generic [ref=e95]:
+      - heading "Recent Activity" [level=3] [ref=e96]
+      - generic [ref=e98] [cursor=pointer]:
+        - img [ref=e100]
+        - generic [ref=e102]:
+          - heading "Backend Concepts Loaded" [level=5] [ref=e103]
+          - paragraph [ref=e104]: 0 total • 0 active
+        - generic [ref=e105]:
+          - generic [ref=e106]: "0"
+          - generic [ref=e107]: Weak
+  - generic [ref=e108]:
+    - button [ref=e109]:
+      - img [ref=e111]
+    - button [ref=e114]:
+      - img [ref=e115]
+    - button [ref=e116]:
+      - img [ref=e117]

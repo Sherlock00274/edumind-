@@ -1,0 +1,9 @@
+- generic [ref=e133]:
+  - generic [ref=e134]:
+    - img [ref=e135]
+    - generic [ref=e138]:
+      - img [ref=e140]
+      - generic [ref=e146]: 65%
+  - generic [ref=e147]:
+    - heading "Processing Map" [level=2] [ref=e148]
+    - paragraph [ref=e149]: Our AI is synthesizing concepts and mapping their latent relationships...
