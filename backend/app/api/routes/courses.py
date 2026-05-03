@@ -1,3 +1,4 @@
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
@@ -182,12 +183,10 @@ def document_scope(chapter_ids: list[str]) -> DocumentScope:
 
 
 def infer_chapter_ids(text: str, chapters: list[ChapterRead]) -> list[str]:
-    haystack = text.lower()
     scored: list[tuple[int, str]] = []
     for chapter in chapters:
-        terms = [chapter.title, *chapter.keywords]
-        score = sum(1 for term in terms if term and term.lower() in haystack)
-        if score > 0:
+        score = chapter_match_score(text, chapter)
+        if score >= 2:
             scored.append((score, chapter.id))
     scored.sort(reverse=True)
     return [chapter_id for _, chapter_id in scored[:3]]
@@ -205,13 +204,15 @@ def assign_cards_to_chapters(
         if not candidate_chapter_ids or chapter.id in candidate_chapter_ids
     ]
     if len(candidates) == 1:
-        matched_chapter = candidates[0]
+        single_candidate = candidates[0]
         for card in cards:
-            card.chapter = format_card_chapter(course, matched_chapter)
+            card.chapter = format_card_chapter(course, single_candidate)
         return
 
     for card in cards:
         matched_chapter = best_matching_chapter(card, candidates or chapters)
+        if matched_chapter is None and candidates:
+            matched_chapter = candidates[0]
         if matched_chapter is not None:
             card.chapter = format_card_chapter(course, matched_chapter)
 
@@ -231,13 +232,63 @@ def best_matching_chapter(card: CardView, chapters: list[ChapterRead]) -> Chapte
     best_score = 0
     best_chapter: ChapterRead | None = None
     for chapter in chapters:
-        terms = [chapter.title, *chapter.keywords]
-        score = sum(1 for term in terms if term and term.lower() in haystack)
+        score = chapter_match_score(haystack, chapter)
         if score > best_score:
             best_score = score
             best_chapter = chapter
-    return best_chapter if best_score > 0 else None
+    return best_chapter if best_score >= 1 else None
 
 
 def format_card_chapter(course: CourseRead, chapter: ChapterRead) -> str:
     return f"{course.title} > {chapter.title}"
+
+
+def chapter_match_score(text: str, chapter: ChapterRead) -> int:
+    haystack = text.lower()
+    haystack_tokens = normalized_tokens(haystack)
+    score = 0
+    for term in [chapter.title, *chapter.keywords]:
+        term_score = term_match_score(term, haystack, haystack_tokens)
+        score += term_score
+    return score
+
+
+def term_match_score(term: str, haystack: str, haystack_tokens: set[str]) -> int:
+    normalized = term.strip().lower()
+    if not normalized:
+        return 0
+
+    if len(normalized) <= 3 or not normalized.isalpha():
+        return 3 if re.search(rf"(?<![a-z0-9]){re.escape(normalized)}(?![a-z0-9])", haystack) else 0
+
+    if re.search(rf"(?<![a-z0-9]){re.escape(normalized)}(?![a-z0-9])", haystack):
+        return 4
+
+    term_tokens = normalized_tokens(normalized)
+    if not term_tokens:
+        return 0
+    overlap = term_tokens & haystack_tokens
+    if len(term_tokens) == 1:
+        return 2 if overlap else 0
+    return min(len(overlap), 3) if overlap else 0
+
+
+def normalized_tokens(text: str) -> set[str]:
+    stopwords = {
+        "and",
+        "or",
+        "the",
+        "of",
+        "to",
+        "in",
+        "with",
+        "under",
+        "large",
+        "simple",
+    }
+    tokens = set()
+    for token in re.findall(r"[a-z0-9]+", text.lower()):
+        if len(token) <= 2 or token in stopwords:
+            continue
+        tokens.add(token[:-1] if token.endswith("s") and len(token) > 4 else token)
+    return tokens

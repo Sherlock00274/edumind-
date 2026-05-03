@@ -443,3 +443,4 @@ print(s.model())
 
 ```
 
+![1777822294782](image/assign3-submit/1777822294782.png)![1777822297237](image/assign3-submit/1777822297237.png)

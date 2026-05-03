@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   ChevronLeft, Network, ChevronDown, CheckSquare, Square, 
-  CheckCircle2, AlertTriangle, Check, Circle, Play, UploadCloud, FileText
+  CheckCircle2, AlertTriangle, Check, Circle, Play, UploadCloud, FileText, Home
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, Chapter, Course, SourceDocument } from '../../types';
@@ -58,15 +58,23 @@ export const MindMapScreen: React.FC<MindMapScreenProps> = ({
   return (
     <div className="relative flex-1 flex flex-col min-h-full bg-slate-50/50">
       <div className="px-6 pt-16 pb-6 bg-white/80 backdrop-blur-xl sticky top-0 z-20 border-bottom border-gray-100/50">
-        <div className="flex items-center gap-3 mb-2">
-          {mindmapContext === 'REVIEW' && (
-            <button onClick={() => setAppState('HOME')} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0 hover:bg-gray-200 transition-colors">
-              <ChevronLeft size={20} className="text-gray-600 pr-0.5"/>
-            </button>
-          )}
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h1 className="min-w-0 flex-1 text-2xl font-bold text-gray-900 tracking-tight">
             {mindmapContext === 'ONBOARDING' ? "Define Scope" : "Knowledge Map"}
           </h1>
+          {mindmapContext === 'REVIEW' && (
+            <button
+              type="button"
+              onClick={() => setAppState('HOME')}
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 text-[11px] font-black uppercase tracking-wider text-blue-600 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-100"
+              aria-label="Back to home"
+              title="Back to home"
+            >
+              <ChevronLeft size={14} strokeWidth={3} />
+              <Home size={14} strokeWidth={2.7} />
+              Home
+            </button>
+          )}
         </div>
         <p className="text-[13px] text-gray-500 leading-relaxed">
           {mindmapContext === 'ONBOARDING' ? "Select the concepts you want to master today." : "A holographic overview of your learning landscape."}

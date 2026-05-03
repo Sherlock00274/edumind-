@@ -37,6 +37,8 @@ from app.schemas.question import QuestionView, QuizOption
 from app.schemas.study import StudySessionRead
 from app.schemas.user import ActivityDay, ProfileStatsRead, UserCreate, UserRead
 
+DEMO_CARD_IDS = {"concept_demo_a_star"}
+
 
 def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid4().hex[:12]}"
@@ -311,7 +313,11 @@ class PersistentStore:
                 .order_by(CardModel.order_index)
             ).all()
             if cards:
-                return [CardView.model_validate(card.payload) for card in cards]
+                return [
+                    CardView.model_validate(card.payload)
+                    for card in cards
+                    if card.id not in DEMO_CARD_IDS
+                ]
         return []
 
     def list_concepts(self, course_id: str) -> list[ConceptRead]:
@@ -319,7 +325,11 @@ class PersistentStore:
             concepts = db.scalars(
                 select(ConceptModel).where(ConceptModel.course_id == course_id)
             ).all()
-            return [ConceptRead.model_validate(concept.payload) for concept in concepts]
+            return [
+                ConceptRead.model_validate(concept.payload)
+                for concept in concepts
+                if concept.id not in DEMO_CARD_IDS
+            ]
 
     def get_concept(self, concept_id: str, user_id: str) -> ConceptRead | None:
         with SessionLocal() as db:
