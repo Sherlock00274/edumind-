@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, BookMarked, Play, Sparkles, FileText, Check, Flame, Trophy, X, Map, SlidersHorizontal, Minus, Plus } from 'lucide-react';
+import { UploadCloud, BookMarked, Play, Sparkles, FileText, Check, Flame, Trophy, X, Map, SlidersHorizontal, Minus, Plus, ArrowRight, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Chapter, Course, SourceDocument } from '../../types';
 
@@ -14,6 +14,8 @@ interface HomeScreenProps {
   isLoadingCourse: boolean;
   totalConcepts: number;
   weakCount: number;
+  reviewedConceptCount: number;
+  unseenConceptCount: number;
   masteryPercent: number;
   documents: SourceDocument[];
   course: Course | null;
@@ -33,6 +35,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   isLoadingCourse,
   totalConcepts,
   weakCount,
+  reviewedConceptCount,
+  unseenConceptCount,
   masteryPercent,
   documents,
   course,
@@ -337,18 +341,60 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
              className="relative pl-10"
            >
               <div className="absolute left-[15px] top-4 w-2.5 h-2.5 rounded-full bg-blue-100 border-[2px] border-white z-10" />
-              <button
-                onClick={() => handleStartStudy('NORMAL')}
-                className="w-full bg-blue-600 text-white rounded-[24px] p-4 shadow-xl shadow-blue-600/20 flex items-center justify-between text-left active:scale-[0.98] transition-all"
-              >
-                <div>
-                  <h5 className="font-black text-[15px] leading-tight">Review Today&apos;s Set</h5>
-                  <p className="text-[10px] text-blue-100 font-black uppercase tracking-wider mt-1">{boundedDailyTarget} concepts selected</p>
+              <div className="space-y-3">
+                <div className={`rounded-[24px] border p-4 shadow-sm ${weakCount > 0 ? 'border-orange-200 bg-orange-50/80' : 'border-emerald-100 bg-emerald-50/70'}`}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${weakCount > 0 ? 'bg-orange-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                        {weakCount > 0 ? <ShieldAlert size={17} /> : <Check size={18} strokeWidth={3} />}
+                      </div>
+                      <div>
+                        <h5 className="font-black text-slate-900 text-[14px] leading-tight">
+                          {weakCount > 0 ? 'Priority Review comes first' : 'Weak queue is clear'}
+                        </h5>
+                        <p className={`mt-0.5 text-[10px] font-black uppercase tracking-wider ${weakCount > 0 ? 'text-orange-500' : 'text-emerald-600'}`}>
+                          {weakCount > 0
+                            ? `${weakCount} studied concepts need follow-up`
+                            : reviewedConceptCount > 0
+                              ? 'No studied concepts currently need priority review'
+                              : 'Start normal study first, then review unstable concepts later'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => weakCount > 0 ? handleStartStudy('WEAKNESS') : handleStartStudy('NORMAL')}
+                    className={`flex w-full items-center justify-between rounded-[20px] px-4 py-3 text-left text-white shadow-lg active:scale-[0.98] transition-all ${weakCount > 0 ? 'bg-orange-500 shadow-orange-500/20' : 'bg-emerald-600 shadow-emerald-600/20'}`}
+                  >
+                    <div>
+                      <h6 className="font-black text-[14px] leading-tight">
+                        {weakCount > 0 ? 'Start Priority Review' : 'Start Today\'s Study Set'}
+                      </h6>
+                      <p className={`mt-1 text-[10px] font-black uppercase tracking-wider ${weakCount > 0 ? 'text-orange-100' : 'text-emerald-100'}`}>
+                        {weakCount > 0
+                          ? 'Only reviewed-and-unstable concepts appear here'
+                          : `${boundedDailyTarget} concepts selected for today`}
+                      </p>
+                    </div>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15">
+                      <ArrowRight size={18} />
+                    </div>
+                  </button>
                 </div>
-                <div className="h-11 w-11 rounded-2xl bg-white/15 flex items-center justify-center">
-                  <Play size={18} fill="currentColor" />
-                </div>
-              </button>
+
+                <button
+                  onClick={() => handleStartStudy('NORMAL')}
+                  className="w-full rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm flex items-center justify-between text-left active:scale-[0.98] transition-all"
+                >
+                  <div>
+                    <h5 className="font-black text-[15px] leading-tight text-slate-900">Continue Normal Study</h5>
+                    <p className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">{boundedDailyTarget} concepts in today&apos;s study set</p>
+                  </div>
+                  <div className="h-11 w-11 rounded-2xl bg-slate-50 flex items-center justify-center text-blue-600">
+                    <Play size={18} fill="currentColor" />
+                  </div>
+                </button>
+              </div>
            </motion.div>
            )}
 
@@ -401,9 +447,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                </div>
                <div className="text-right">
                   <div className="text-[13px] font-black text-slate-900">{weakCount}</div>
-                  <div className="text-[9px] font-black text-emerald-500 uppercase">Weak</div>
+                  <div className="text-[9px] font-black text-emerald-500 uppercase">Needs review</div>
                </div>
             </div>
+            {course && (
+              <div className="px-4 pb-4 text-[10px] font-black uppercase tracking-[0.16em] text-slate-300">
+                {reviewedConceptCount} reviewed • {unseenConceptCount} unseen
+              </div>
+            )}
          </div>
       </div>
     </motion.div>

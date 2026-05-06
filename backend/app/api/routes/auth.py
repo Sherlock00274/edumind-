@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser
+from app.core.config import settings
+from app.schemas.settings import UserLlmSettingsRead, UserLlmSettingsUpdate
 from app.schemas.user import AuthRead, ProfileStatsRead, UserCreate, UserLogin, UserRead
 from app.services.in_memory import store
 
@@ -32,3 +34,14 @@ def me(user: CurrentUser) -> UserRead:
 @router.get("/users/me/profile", response_model=ProfileStatsRead)
 def profile_stats(user: CurrentUser) -> ProfileStatsRead:
     return store.get_profile_stats(user.id)
+
+
+@router.get("/users/me/llm-settings", response_model=UserLlmSettingsRead)
+def get_llm_settings(user: CurrentUser) -> UserLlmSettingsRead:
+    return store.get_user_llm_settings(user.id, fallback_api_key=settings.llm_api_key)
+
+
+@router.put("/users/me/llm-settings", response_model=UserLlmSettingsRead)
+def update_llm_settings(payload: UserLlmSettingsUpdate, user: CurrentUser) -> UserLlmSettingsRead:
+    store.set_user_llm_api_key(user.id, payload.api_key)
+    return store.get_user_llm_settings(user.id, fallback_api_key=settings.llm_api_key)

@@ -3,12 +3,15 @@ import {
   Chapter,
   Course,
   CourseStructureDraft,
+  BehaviorHint,
   Quiz,
   SessionStats,
   SourceDocument,
+  StudyPlan,
   StudyMode,
   ProfileStats,
   UserAccount,
+  UserLlmSettings,
   UserProgress,
 } from "../types";
 
@@ -22,6 +25,8 @@ interface BackendQuizOption {
 }
 
 interface BackendQuestionView {
+  id: string;
+  conceptId: string;
   stem: string;
   options: BackendQuizOption[];
   answer: string;
@@ -84,7 +89,10 @@ interface BackendCourseAnalyticsRead {
   masteryRate: number;
   resolvedToday: number;
   weakPoolCount: number;
+  reviewedConceptCount: number;
+  unseenConceptCount: number;
   weakConcepts: BackendCardView[];
+  behaviorHint: BehaviorHint;
   sessions: {
     id: string;
     timestamp: number;
@@ -167,6 +175,17 @@ export const getProfileStats = async (): Promise<ProfileStats> => {
   return requestJson<ProfileStats>("/users/me/profile");
 };
 
+export const getUserLlmSettings = async (): Promise<UserLlmSettings> => {
+  return requestJson<UserLlmSettings>("/users/me/llm-settings");
+};
+
+export const updateUserLlmSettings = async (apiKey: string): Promise<UserLlmSettings> => {
+  return requestJson<UserLlmSettings>("/users/me/llm-settings", {
+    method: "PUT",
+    body: JSON.stringify({ apiKey }),
+  });
+};
+
 export interface CourseMaterialResult {
   cards: Card[];
   documents: SourceDocument[];
@@ -182,7 +201,10 @@ export interface CourseAnalytics {
   resolvedToday: number;
   weakPool: string[];
   weakCards: Card[];
+  reviewedConceptCount: number;
+  unseenConceptCount: number;
   userProgress: UserProgress;
+  behaviorHint: BehaviorHint;
 }
 
 export const listCourses = async (): Promise<CourseRead[]> => {
@@ -244,12 +266,19 @@ export const getCourseAnalytics = async (courseId: string): Promise<CourseAnalyt
     resolvedToday: analytics.resolvedToday,
     weakPool: analytics.weakConcepts.map(card => card.id),
     weakCards: analytics.weakConcepts.map(toFrontendCard),
+    reviewedConceptCount: analytics.reviewedConceptCount,
+    unseenConceptCount: analytics.unseenConceptCount,
     userProgress: {
       totalStudyTime: analytics.sessions.reduce((total, session) => total + session.duration, 0),
       sessions: analytics.sessions,
       upcomingReviews: analytics.upcomingReviews,
     },
+    behaviorHint: analytics.behaviorHint,
   };
+};
+
+export const getCurrentStudyPlan = async (courseId: string): Promise<StudyPlan> => {
+  return requestJson<StudyPlan>(`/courses/${courseId}/plans/current`);
 };
 
 export const getUserProgress = async (): Promise<UserProgress> => {
@@ -324,6 +353,24 @@ export const submitStudyFeedback = async (
   });
 };
 
+export const submitQuizAnswer = async (
+  courseId: string,
+  questionId: string,
+  selectedAnswer: string,
+  confidence: number,
+  responseTime: number,
+) => {
+  return requestJson(`/courses/${courseId}/answers`, {
+    method: "POST",
+    body: JSON.stringify({
+      questionId,
+      selectedAnswer,
+      confidence,
+      responseTime,
+    }),
+  });
+};
+
 export const completeStudySession = async (sessionId: string): Promise<SessionStats> => {
   return requestJson<SessionStats>(`/sessions/${sessionId}/complete`, {
     method: "POST",
@@ -331,6 +378,8 @@ export const completeStudySession = async (sessionId: string): Promise<SessionSt
 };
 
 export const toQuiz = (card: Card): Quiz => ({
+  id: card.inlineQuiz.id,
+  conceptId: card.id,
   question: card.inlineQuiz.question,
   options: card.inlineQuiz.options,
   correctAnswer: card.inlineQuiz.correctAnswer,
@@ -348,6 +397,7 @@ const toFrontendCard = (card: BackendCardView): Card => ({
   errorCount: card.errorCount ?? 0,
   mastery: card.mastery,
   inlineQuiz: {
+    id: card.inlineQuiz.id,
     question: card.inlineQuiz.stem,
     options: card.inlineQuiz.options,
     correctAnswer: card.inlineQuiz.answer,

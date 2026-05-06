@@ -32,9 +32,14 @@ DOCUMENT_TYPE_SCHEMA = {
 }
 
 
-async def extract_uploaded_document(filename: str, content: bytes) -> ExtractedDocument:
+async def extract_uploaded_document(
+    filename: str,
+    content: bytes,
+    *,
+    api_key: str | None = None,
+) -> ExtractedDocument:
     text = extract_text(filename, content)
-    document_type = classify_document_type(filename, text)
+    document_type = classify_document_type(filename, text, api_key=api_key)
     return ExtractedDocument(filename=filename, documentType=document_type, text=text)
 
 
@@ -94,14 +99,19 @@ def decode_text(content: bytes) -> str:
     return content.decode("utf-8", errors="ignore").strip()
 
 
-def classify_document_type(filename: str, text: str) -> DocumentType:
+def classify_document_type(filename: str, text: str, *, api_key: str | None = None) -> DocumentType:
     try:
-        return classify_document_type_with_ai(filename, text)
+        return classify_document_type_with_ai(filename, text, api_key=api_key)
     except (AiGatewayError, ValidationError, ValueError):
         return classify_document_type_fallback(filename, text)
 
 
-def classify_document_type_with_ai(filename: str, text: str) -> DocumentType:
+def classify_document_type_with_ai(
+    filename: str,
+    text: str,
+    *,
+    api_key: str | None = None,
+) -> DocumentType:
     prompt = f"""
 Classify this uploaded course document into exactly one EduMind DocumentType.
 
@@ -126,6 +136,7 @@ Content sample:
         DOCUMENT_TYPE_SCHEMA,
         system_prompt="You classify course documents. Return JSON only.",
         temperature=0,
+        api_key=api_key,
     )
     payload = DocumentTypePayload.model_validate(raw)
     return payload.document_type

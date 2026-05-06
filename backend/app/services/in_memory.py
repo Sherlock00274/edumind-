@@ -7,20 +7,25 @@ from uuid import uuid4
 from sqlalchemy import delete, select
 from sqlalchemy.exc import OperationalError
 
+from app.core.config import settings
 from app.db.models import (
     ActiveConceptModel,
     AuthTokenModel,
+    BehaviorLogModel,
     CardModel,
     ChapterModel,
     ConceptModel,
+    ConceptStateModel,
     CourseModel,
     SourceDocumentModel,
     StudySessionModel,
+    UserAnswerModel,
     UserModel,
+    UserSettingModel,
 )
 from app.db.session import SessionLocal, init_db
 from app.schemas.common import Difficulty, EvidenceLevel, QuestionType, StudyMode
-from app.schemas.concept import CardView, ConceptRead
+from app.schemas.concept import CardView, ConceptRead, ConceptStateRead
 from app.schemas.course import (
     ChapterCreate,
     ChapterRead,
@@ -33,9 +38,11 @@ from app.schemas.course import (
     ParseStatus,
     SourceDocumentRead,
 )
-from app.schemas.question import QuestionView, QuizOption
+from app.schemas.question import QuestionView, QuizOption, UserAnswerCreate, UserAnswerResult
+from app.schemas.settings import UserLlmSettingsRead
 from app.schemas.study import StudySessionRead
 from app.schemas.user import ActivityDay, ProfileStatsRead, UserCreate, UserRead
+from app.services.knowledge_state.service import MasteryUpdateInput, update_mastery
 
 DEMO_CARD_IDS = {"concept_demo_a_star"}
 
@@ -193,6 +200,44 @@ class PersistentStore:
             )
         )
 
+    def get_user_llm_settings(self, user_id: str, *, fallback_api_key: str | None = None) -> UserLlmSettingsRead:
+        with SessionLocal() as db:
+            settings_model = db.get(UserSettingModel, user_id)
+            user_api_key = (settings_model.llm_api_key or "").strip() if settings_model else ""
+        effective_key = user_api_key or (fallback_api_key or "").strip()
+        return UserLlmSettingsRead(
+            apiUrl=settings.llm_api_url,
+            model=settings.llm_model,
+            hasUserApiKey=bool(user_api_key),
+            hasEffectiveApiKey=bool(effective_key),
+            apiKeyPreview=mask_api_key(user_api_key) if user_api_key else None,
+        )
+
+    def set_user_llm_api_key(self, user_id: str, api_key: str | None) -> None:
+        normalized = (api_key or "").strip() or None
+        with SessionLocal() as db:
+            settings_model = db.get(UserSettingModel, user_id)
+            if settings_model is None:
+                settings_model = UserSettingModel(
+                    user_id=user_id,
+                    llm_api_key=normalized,
+                    updated_at=datetime.now(UTC),
+                )
+                db.add(settings_model)
+            else:
+                settings_model.llm_api_key = normalized
+                settings_model.updated_at = datetime.now(UTC)
+            db.commit()
+
+    def resolve_llm_api_key(self, user_id: str, fallback_api_key: str | None = None) -> str | None:
+        with SessionLocal() as db:
+            settings_model = db.get(UserSettingModel, user_id)
+            user_api_key = (settings_model.llm_api_key or "").strip() if settings_model else ""
+        if user_api_key:
+            return user_api_key
+        normalized_fallback = (fallback_api_key or "").strip()
+        return normalized_fallback or None
+
     def get_profile_stats(self, user_id: str) -> ProfileStatsRead:
         cards = [
             card
@@ -252,26 +297,33 @@ class PersistentStore:
             return [document_to_schema(document) for document in documents]
 
     def set_generated_cards(self, course_id: str, cards: list[CardView]) -> None:
-        concepts = [
-            ConceptRead(
-                id=card.id,
-                course_id=course_id,
-                chapter_id=find_chapter_id(self.list_chapters(course_id), card.chapter),
-                nameEn=card.concept_en,
-                nameZh=card.concept_zh,
-                description=card.description,
-                importance=0.6,
-                examWeight=0.5,
-                prerequisites=[],
-                sourceChunkIds=card.source_chunk_ids,
-                evidenceLevel=card.evidence_level,
+        chapters = self.list_chapters(course_id)
+        concepts: list[ConceptRead] = []
+        previous_by_chapter: dict[str, str] = {}
+        for card in cards:
+            chapter_id = find_chapter_id(chapters, card.chapter)
+            prerequisite = previous_by_chapter.get(chapter_id or card.chapter)
+            concepts.append(
+                ConceptRead(
+                    id=card.id,
+                    course_id=course_id,
+                    chapter_id=chapter_id,
+                    nameEn=card.concept_en,
+                    nameZh=card.concept_zh,
+                    description=card.description,
+                    importance=0.6,
+                    examWeight=0.5,
+                    prerequisites=[prerequisite] if prerequisite else [],
+                    sourceChunkIds=card.source_chunk_ids,
+                    evidenceLevel=card.evidence_level,
+                )
             )
-            for card in cards
-        ]
+            previous_by_chapter[chapter_id or card.chapter] = card.id
         with SessionLocal() as db:
             db.execute(delete(CardModel).where(CardModel.course_id == course_id))
             db.execute(delete(ConceptModel).where(ConceptModel.course_id == course_id))
             db.execute(delete(ActiveConceptModel).where(ActiveConceptModel.course_id == course_id))
+            db.execute(delete(ConceptStateModel).where(ConceptStateModel.course_id == course_id))
             db.add_all(
                 [
                     CardModel(
@@ -299,11 +351,60 @@ class PersistentStore:
                     for index, card in enumerate(cards)
                 ]
             )
+            course = db.get(CourseModel, course_id)
+            if course is not None:
+                db.add_all(
+                    [
+                        ConceptStateModel(
+                            user_id=course.user_id,
+                            course_id=course_id,
+                            concept_id=card.id,
+                            mastery=card.mastery,
+                            confidence=0.5,
+                            avg_response_time=0,
+                            error_count=card.error_count,
+                            last_reviewed_at=None,
+                            next_review_at=None,
+                            error_patterns=[],
+                        )
+                        for card in cards
+                    ]
+                )
             db.commit()
 
     def append_generated_cards(self, course_id: str, cards: list[CardView]) -> None:
         existing_cards = self.get_cards(course_id)
         self.set_generated_cards(course_id, [*existing_cards, *cards])
+
+    def ensure_concept_states(self, course_id: str, user_id: str) -> None:
+        cards = self.get_cards(course_id)
+        with SessionLocal() as db:
+            existing_ids = set(
+                db.scalars(
+                    select(ConceptStateModel.concept_id)
+                    .where(ConceptStateModel.course_id == course_id)
+                    .where(ConceptStateModel.user_id == user_id)
+                ).all()
+            )
+            db.add_all(
+                [
+                    ConceptStateModel(
+                        user_id=user_id,
+                        course_id=course_id,
+                        concept_id=card.id,
+                        mastery=card.mastery,
+                        confidence=0.5,
+                        avg_response_time=0,
+                        error_count=card.error_count,
+                        last_reviewed_at=None,
+                        next_review_at=None,
+                        error_patterns=[],
+                    )
+                    for card in cards
+                    if card.id not in existing_ids
+                ]
+            )
+            db.commit()
 
     def get_cards(self, course_id: str) -> list[CardView]:
         with SessionLocal() as db:
@@ -330,6 +431,16 @@ class PersistentStore:
                 for concept in concepts
                 if concept.id not in DEMO_CARD_IDS
             ]
+
+    def list_concept_states(self, course_id: str, user_id: str) -> list[ConceptStateRead]:
+        self.ensure_concept_states(course_id, user_id)
+        with SessionLocal() as db:
+            states = db.scalars(
+                select(ConceptStateModel)
+                .where(ConceptStateModel.course_id == course_id)
+                .where(ConceptStateModel.user_id == user_id)
+            ).all()
+            return [concept_state_to_schema(state) for state in states]
 
     def get_concept(self, concept_id: str, user_id: str) -> ConceptRead | None:
         with SessionLocal() as db:
@@ -405,6 +516,7 @@ class PersistentStore:
         user_id: str,
         concept_id: str,
         mastered: bool,
+        response_time: float = 0,
     ) -> StudySessionModel | None:
         with SessionLocal() as db:
             session = db.get(StudySessionModel, session_id)
@@ -417,19 +529,144 @@ class PersistentStore:
 
             card = db.get(CardModel, concept_id)
             if card is not None and card.course_id == session.course_id:
-                payload = dict(card.payload)
-                if mastered:
-                    payload["mastery"] = min(float(payload.get("mastery", 0)) + 0.15, 1)
-                    payload["errorCount"] = max(int(payload.get("errorCount", 0)) - 1, 0)
-                else:
-                    payload["mastery"] = max(float(payload.get("mastery", 0)) - 0.1, 0)
-                    payload["errorCount"] = int(payload.get("errorCount", 0)) + 1
-                card.payload = payload
+                self._apply_state_update(
+                    db=db,
+                    user_id=user_id,
+                    course_id=session.course_id,
+                    concept_id=concept_id,
+                    correct=mastered,
+                    answer_confidence=0.8 if mastered else 0.3,
+                    response_time=response_time,
+                    error_pattern=None if mastered else "self_reported_unsure",
+                )
 
             db.commit()
             db.refresh(session)
             db.expunge(session)
             return session
+
+    def record_quiz_answer(
+        self,
+        user_id: str,
+        course_id: str,
+        payload: UserAnswerCreate,
+    ) -> UserAnswerResult | None:
+        with SessionLocal() as db:
+            card = find_card_by_question_id(db, course_id, payload.question_id)
+            if card is None:
+                return None
+            card_payload = CardView.model_validate(card.payload)
+            correct = payload.selected_answer == card_payload.inline_quiz.answer
+            answer = UserAnswerModel(
+                id=new_id("answer"),
+                user_id=user_id,
+                course_id=course_id,
+                concept_id=card.id,
+                question_id=payload.question_id,
+                selected_answer=payload.selected_answer,
+                correct=correct,
+                confidence=payload.confidence,
+                response_time=payload.response_time,
+                created_at=datetime.now(UTC),
+            )
+            db.add(answer)
+            state = self._apply_state_update(
+                db=db,
+                user_id=user_id,
+                course_id=course_id,
+                concept_id=card.id,
+                correct=correct,
+                answer_confidence=payload.confidence,
+                response_time=payload.response_time,
+                error_pattern=None if correct else f"missed:{card_payload.inline_quiz.type.value}",
+            )
+            db.add(
+                BehaviorLogModel(
+                    id=new_id("behavior"),
+                    user_id=user_id,
+                    course_id=course_id,
+                    event_type="quiz_answer",
+                    payload={
+                        "conceptId": card.id,
+                        "questionId": payload.question_id,
+                        "correct": correct,
+                        "responseTime": payload.response_time,
+                    },
+                    created_at=datetime.now(UTC),
+                )
+            )
+            db.commit()
+            return UserAnswerResult(
+                questionId=payload.question_id,
+                conceptId=card.id,
+                correct=correct,
+                answer=card_payload.inline_quiz.answer,
+                mastery=state.mastery,
+                confidence=state.confidence,
+                avgResponseTime=state.avg_response_time,
+                errorCount=state.error_count,
+            )
+
+    def _apply_state_update(
+        self,
+        db,
+        user_id: str,
+        course_id: str,
+        concept_id: str,
+        correct: bool,
+        answer_confidence: float,
+        response_time: float,
+        error_pattern: str | None,
+    ) -> ConceptStateModel:
+        state = db.scalar(
+            select(ConceptStateModel)
+            .where(ConceptStateModel.user_id == user_id)
+            .where(ConceptStateModel.concept_id == concept_id)
+        )
+        card = db.get(CardModel, concept_id)
+        card_payload = dict(card.payload) if card is not None else {}
+        if state is None:
+            state = ConceptStateModel(
+                user_id=user_id,
+                course_id=course_id,
+                concept_id=concept_id,
+                mastery=float(card_payload.get("mastery", 0.3)),
+                confidence=0.5,
+                avg_response_time=0,
+                error_count=int(card_payload.get("errorCount", 0)),
+                error_patterns=[],
+            )
+            db.add(state)
+
+        result = update_mastery(
+            MasteryUpdateInput(
+                mastery=state.mastery,
+                confidence=state.confidence,
+                avg_response_time=state.avg_response_time,
+                error_count=state.error_count,
+                correct=correct,
+                answer_confidence=answer_confidence,
+                response_time=response_time,
+            )
+        )
+        state.mastery = result.mastery
+        state.confidence = result.confidence
+        state.avg_response_time = result.avg_response_time
+        state.error_count = result.error_count
+        state.last_reviewed_at = datetime.now(UTC)
+        state.next_review_at = next_review_time(result.mastery, result.error_count)
+        patterns = list(state.error_patterns or [])
+        if error_pattern and error_pattern not in patterns:
+            patterns.append(error_pattern)
+        if correct and result.error_count == 0:
+            patterns = []
+        state.error_patterns = patterns[-5:]
+
+        if card is not None:
+            card_payload["mastery"] = result.mastery
+            card_payload["errorCount"] = result.error_count
+            card.payload = card_payload
+        return state
 
     def complete_session(self, session_id: str, user_id: str) -> StudySessionModel | None:
         with SessionLocal() as db:
@@ -547,6 +784,45 @@ def document_to_schema(document: SourceDocumentModel) -> SourceDocumentRead:
     )
 
 
+def concept_state_to_schema(state: ConceptStateModel) -> ConceptStateRead:
+    return ConceptStateRead(
+        conceptId=state.concept_id,
+        mastery=state.mastery,
+        confidence=state.confidence,
+        avgResponseTime=state.avg_response_time,
+        errorCount=state.error_count,
+        lastReviewedAt=timestamp_iso(state.last_reviewed_at),
+        nextReviewAt=timestamp_iso(state.next_review_at),
+        errorPatterns=state.error_patterns or [],
+    )
+
+
+def find_card_by_question_id(db, course_id: str, question_id: str) -> CardModel | None:
+    cards = db.scalars(select(CardModel).where(CardModel.course_id == course_id)).all()
+    for card in cards:
+        try:
+            payload = CardView.model_validate(card.payload)
+        except ValueError:
+            continue
+        if payload.inline_quiz.id == question_id:
+            return card
+    return None
+
+
+def next_review_time(mastery: float, error_count: int) -> datetime:
+    if error_count > 0 or mastery < 0.45:
+        delay = timedelta(hours=4)
+    elif mastery < 0.75:
+        delay = timedelta(days=1)
+    else:
+        delay = timedelta(days=3)
+    return datetime.now(UTC) + delay
+
+
+def timestamp_iso(value: datetime | None) -> str | None:
+    return value.isoformat() if isinstance(value, datetime) else None
+
+
 def find_chapter_id(chapters: list[ChapterRead], chapter_title: str) -> str | None:
     normalized = chapter_title.split(">")[-1].strip().lower()
     for chapter in chapters:
@@ -557,6 +833,12 @@ def find_chapter_id(chapters: list[ChapterRead], chapter_title: str) -> str | No
 
 def hash_password(password: str) -> str:
     return sha256(password.encode("utf-8")).hexdigest()
+
+
+def mask_api_key(api_key: str) -> str:
+    if len(api_key) <= 8:
+        return "*" * len(api_key)
+    return f"{api_key[:4]}{'*' * max(len(api_key) - 8, 4)}{api_key[-4:]}"
 
 
 def build_activity_distribution(sessions: list[StudySessionModel]) -> list[ActivityDay]:

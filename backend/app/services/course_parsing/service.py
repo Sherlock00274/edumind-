@@ -93,14 +93,19 @@ EXTRACTION_SCHEMA = {
 }
 
 
-def parse_text_to_cards(course_id: str, content: str) -> list[CardView]:
+def parse_text_to_cards(course_id: str, content: str, *, api_key: str | None = None) -> list[CardView]:
     try:
-        return parse_text_to_cards_with_ai(course_id, content)
+        return parse_text_to_cards_with_ai(course_id, content, api_key=api_key)
     except (AiGatewayError, ValidationError, ValueError):
         return parse_text_to_cards_fallback(course_id, content)
 
 
-def parse_text_to_cards_with_ai(course_id: str, content: str) -> list[CardView]:
+def parse_text_to_cards_with_ai(
+    course_id: str,
+    content: str,
+    *,
+    api_key: str | None = None,
+) -> list[CardView]:
     prompt = f"""
 Extract key concepts from this course material for a final-exam revision system.
 
@@ -128,6 +133,7 @@ Material:
             "Extract course-grounded concepts and quizzes. Return JSON only."
         ),
         temperature=0.15,
+        api_key=api_key,
     )
     payload = ExtractedCardsPayload.model_validate(raw)
     return [

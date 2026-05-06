@@ -61,14 +61,19 @@ SYLLABUS_SCHEMA = {
 }
 
 
-def parse_syllabus_to_structure(text: str, filename: str = "syllabus") -> CourseStructureDraft:
+def parse_syllabus_to_structure(
+    text: str,
+    filename: str = "syllabus",
+    *,
+    api_key: str | None = None,
+) -> CourseStructureDraft:
     try:
-        return parse_syllabus_with_ai(text, filename)
+        return parse_syllabus_with_ai(text, filename, api_key=api_key)
     except (AiGatewayError, ValidationError, ValueError):
         return parse_syllabus_fallback(text, filename)
 
 
-def parse_syllabus_with_ai(text: str, filename: str) -> CourseStructureDraft:
+def parse_syllabus_with_ai(text: str, filename: str, *, api_key: str | None = None) -> CourseStructureDraft:
     prompt = f"""
 Extract a course setup draft from this syllabus.
 
@@ -89,6 +94,7 @@ Syllabus:
         SYLLABUS_SCHEMA,
         system_prompt="You parse university syllabi into course structure JSON. Return JSON only.",
         temperature=0.1,
+        api_key=api_key,
     )
     payload = SyllabusPayload.model_validate(raw)
     return CourseStructureDraft.model_validate(payload.model_dump(by_alias=True))

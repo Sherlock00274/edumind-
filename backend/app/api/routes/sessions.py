@@ -57,6 +57,7 @@ def submit_feedback(
         user.id,
         payload.concept_id,
         payload.feedback == "mastered",
+        payload.response_time,
     )
     if session is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")

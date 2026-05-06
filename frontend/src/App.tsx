@@ -14,6 +14,7 @@ import {
   getUserProgress,
   isBackendApiConfigured,
   listCourses,
+  submitQuizAnswer,
   submitStudyFeedback,
   toQuiz,
   updateActiveConcepts,
@@ -29,6 +30,7 @@ import { QuizScreen } from './components/screens/QuizScreen';
 import { ProfileScreen } from './components/screens/ProfileScreen';
 import { WeaknessReportScreen } from './components/screens/WeaknessReportScreen';
 import { CourseReviewScreen } from './components/screens/CourseReviewScreen';
+import { PriorityReviewScreen } from './components/screens/PriorityReviewScreen';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('HOME');
@@ -50,10 +52,11 @@ export default function App() {
   const [weakPool, setWeakPool] = useState<string[]>([]);
   const [dailyConceptTarget, setDailyConceptTarget] = useState(8);
   const [resolvedToday, setResolvedToday] = useState(0);
-  const [inlineAnswers, setInlineAnswers] = useState<Record<string, string | null>>({});
-  const [expandedQuizId, setExpandedQuizId] = useState<string | null>(null);
+  const [reviewedConceptCount, setReviewedConceptCount] = useState(0);
+  const [unseenConceptCount, setUnseenConceptCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [behaviorHint, setBehaviorHint] = useState<string>('');
 
   const [mindmapContext, setMindmapContext] = useState<'ONBOARDING' | 'REVIEW'>('REVIEW');
   const [mapSelectedIds, setMapSelectedIds] = useState<string[]>([]);
@@ -87,6 +90,9 @@ export default function App() {
     setCollapsedChapters([]);
     setActiveSessionId(null);
     setSessionStats(null);
+    setReviewedConceptCount(0);
+    setUnseenConceptCount(0);
+    setSelectedOption(null);
     setUserProgress({
       totalStudyTime: 0,
       sessions: [],
@@ -98,6 +104,9 @@ export default function App() {
     const analytics = await getCourseAnalytics(targetCourseId);
     setWeakPool(analytics.weakPool);
     setResolvedToday(analytics.resolvedToday);
+    setReviewedConceptCount(analytics.reviewedConceptCount);
+    setUnseenConceptCount(analytics.unseenConceptCount);
+    setBehaviorHint(analytics.behaviorHint.message);
     setUserProgress(prev => ({
       ...prev,
       ...analytics.userProgress,
@@ -260,7 +269,6 @@ export default function App() {
         setActiveCardIds(newIds);
         setMapSelectedIds(newIds);
         await refreshAnalytics(courseId);
-        setInlineAnswers({});
         const chapterNames = chapters.length > 0
           ? chapters.map(chapter => chapter.title)
           : Array.from(new Set(result.cards.map(card => card.chapter.split(' > ')[1] || 'General Theory')));
@@ -388,7 +396,7 @@ export default function App() {
     setIsFlipped(false);
     setSelectedOption(null);
     setSessionStartTime(Date.now());
-    setAppState('STUDYING');
+    setAppState(mode === 'WEAKNESS' ? 'PRIORITY_REVIEW' : 'STUDYING');
   }, [courseId, dailyConceptTarget, showToast]);
 
   const handleExitStudy = useCallback(() => {
@@ -398,9 +406,11 @@ export default function App() {
   }, [studyMode]);
 
   const recordSessionEnd = useCallback(async () => {
+    let completedStats = sessionStats;
     if (activeSessionId) {
       const stats = await completeStudySession(activeSessionId);
       setSessionStats(stats);
+      completedStats = stats;
       setActiveSessionId(null);
     }
 
@@ -416,7 +426,7 @@ export default function App() {
             timestamp: Date.now(),
             duration: duration,
             conceptsCount: studyQueue.length,
-            masteryRate: sessionStats ? sessionStats.mastered / studyQueue.length : 1
+            masteryRate: completedStats && studyQueue.length > 0 ? completedStats.mastered / studyQueue.length : 1
           }
         ]
       }));
@@ -428,6 +438,9 @@ export default function App() {
       setCards(refreshedCards);
     }
   }, [activeSessionId, courseId, refreshAnalytics, sessionStartTime, studyQueue.length, sessionStats]);
+
+  const currentCard = studyQueue[currentIndex];
+  const currentQuiz = currentCard ? toQuiz(currentCard) : null;
 
   const handleFeedback = useCallback(async (isMastered: boolean) => {
     const currentCard = studyQueue[currentIndex];
@@ -483,6 +496,10 @@ export default function App() {
 
   const handleQuizComplete = useCallback(() => {
     setSelectedOption(null);
+    if (courseId) {
+      getCourseCards(courseId).then(setCards).catch(() => undefined);
+      refreshAnalytics(courseId).catch(() => undefined);
+    }
     if (currentIndex < studyQueue.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setAppState('STUDYING');
@@ -491,22 +508,78 @@ export default function App() {
       setCurrentIndex(0);
       showToast('Learning cycle completed');
     }
-  }, [currentIndex, studyQueue.length, showToast]);
+  }, [courseId, currentIndex, refreshAnalytics, studyQueue.length, showToast]);
 
-  const handleInlineQuizSelect = useCallback((cardId: string, optionId: string, correctAnswer: string) => {
-    if (inlineAnswers[cardId]) return;
-    setInlineAnswers(prev => ({ ...prev, [cardId]: optionId }));
-    if (optionId === correctAnswer) {
-      setTimeout(() => {
-        setWeakPool(prev => prev.filter(id => id !== cardId));
-        setResolvedToday(prev => prev + 1);
-        showToast('Solved. Removed from weakness pool');
-        setExpandedQuizId(null);
-      }, 1500);
-    } else {
-      showToast('Keep trying. Incorrect answer');
+  const handleQuizOptionSelect = useCallback(async (optionId: string) => {
+    if (!currentQuiz || !currentCard || !courseId || selectedOption) return;
+    setSelectedOption(optionId);
+    try {
+      await submitQuizAnswer(
+        courseId,
+        currentQuiz.id,
+        optionId,
+        optionId === currentQuiz.correctAnswer ? 0.85 : 0.35,
+        sessionStartTime ? (Date.now() - sessionStartTime) / 1000 : 0,
+      );
+      if (optionId !== currentQuiz.correctAnswer && !weakPool.includes(currentCard.id)) {
+        setWeakPool(prev => [...prev, currentCard.id]);
+      }
+    } catch (error) {
+      showToast('Failed to save quiz answer');
     }
-  }, [inlineAnswers, showToast]);
+  }, [courseId, currentCard, currentQuiz, selectedOption, sessionStartTime, showToast, weakPool]);
+
+  const handlePriorityReviewAnswer = useCallback(async (optionId: string) => {
+    if (!currentQuiz || !currentCard || !courseId || selectedOption) return;
+
+    setSelectedOption(optionId);
+    const isCorrect = optionId === currentQuiz.correctAnswer;
+    const responseTime = sessionStartTime ? (Date.now() - sessionStartTime) / 1000 : 0;
+
+    try {
+      await submitQuizAnswer(
+        courseId,
+        currentQuiz.id,
+        optionId,
+        isCorrect ? 0.9 : 0.35,
+        responseTime,
+      );
+
+      if (activeSessionId) {
+        const stats = await submitStudyFeedback(
+          activeSessionId,
+          currentCard.id,
+          isCorrect,
+          responseTime,
+        );
+        setSessionStats(stats);
+      }
+
+      if (isCorrect) {
+        setWeakPool(prev => prev.filter(id => id !== currentCard.id));
+        setResolvedToday(prev => prev + 1);
+      } else if (!weakPool.includes(currentCard.id)) {
+        setWeakPool(prev => [...prev, currentCard.id]);
+      }
+    } catch (error) {
+      showToast('Failed to save priority review result');
+    }
+  }, [activeSessionId, courseId, currentCard, currentQuiz, selectedOption, sessionStartTime, showToast, weakPool]);
+
+  const handlePriorityReviewContinue = useCallback(async () => {
+    if (selectedOption === null) return;
+
+    if (currentIndex < studyQueue.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setSelectedOption(null);
+      setSessionStartTime(Date.now());
+      return;
+    }
+
+    await recordSessionEnd();
+    setSelectedOption(null);
+    setAppState('WEAKNESS_REPORT');
+  }, [currentIndex, recordSessionEnd, selectedOption, studyQueue.length]);
 
   const groupedCards = useMemo(() => {
     const groups: Record<string, Card[]> = {};
@@ -523,9 +596,6 @@ export default function App() {
     [weakPool, cards]
   );
   
-  const maxErrorCount = Math.max(...weakCards.map(c => c.errorCount), 1);
-  const currentCard = studyQueue[currentIndex];
-  const currentQuiz = currentCard ? toQuiz(currentCard) : null;
   const shouldShowNavigation =
     ['HOME', 'ANALYTICS', 'PROFILE'].includes(appState) ||
     (appState === 'MINDMAP' && mindmapContext === 'REVIEW');
@@ -574,6 +644,8 @@ export default function App() {
                 isLoadingCourse={isLoadingCourse}
                 totalConcepts={cards.length}
                 weakCount={weakPool.length}
+                reviewedConceptCount={reviewedConceptCount}
+                unseenConceptCount={unseenConceptCount}
                 masteryPercent={cards.length ? Math.round((cards.reduce((sum, card) => sum + card.mastery, 0) / cards.length) * 100) : 0}
                 documents={documents}
                 course={course}
@@ -633,12 +705,22 @@ export default function App() {
                 weakCards={weakCards}
                 resolvedToday={resolvedToday}
                 weakPool={weakPool}
-                maxErrorCount={maxErrorCount}
+                reviewedConceptCount={reviewedConceptCount}
+                unseenConceptCount={unseenConceptCount}
+                behaviorHint={behaviorHint}
                 handleStartStudy={handleStartStudy}
-                expandedQuizId={expandedQuizId}
-                toggleExpandQuiz={setExpandedQuizId}
-                inlineAnswers={inlineAnswers}
-                handleInlineQuizSelect={handleInlineQuizSelect}
+              />
+            )}
+            {appState === 'PRIORITY_REVIEW' && currentCard && (
+              <PriorityReviewScreen
+                key="priority-review"
+                currentCard={currentCard}
+                currentIndex={currentIndex}
+                total={studyQueue.length}
+                selectedOption={selectedOption}
+                onSelectOption={handlePriorityReviewAnswer}
+                onContinue={handlePriorityReviewContinue}
+                onExit={handleExitStudy}
               />
             )}
             {appState === 'QUIZ' && currentQuiz && (
@@ -646,7 +728,7 @@ export default function App() {
                 key="quiz"
                 currentQuiz={currentQuiz}
                 selectedOption={selectedOption}
-                setSelectedOption={setSelectedOption}
+                setSelectedOption={handleQuizOptionSelect}
                 handleQuizComplete={handleQuizComplete}
               />
             )}
@@ -655,6 +737,8 @@ export default function App() {
                 key="profile"
                 setAppState={setAppState}
                 userProgress={userProgress}
+                activeCourseId={courseId}
+                behaviorHint={behaviorHint}
                 onAuthChange={handleAuthChange}
                 onLogout={handleLogout}
               />

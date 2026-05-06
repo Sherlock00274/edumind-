@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-export type AppState = 'HOME' | 'PARSING' | 'COURSE_REVIEW' | 'MINDMAP' | 'STUDYING' | 'ANALYTICS' | 'QUIZ' | 'WEAKNESS_REPORT' | 'PROFILE';
+export type AppState = 'HOME' | 'PARSING' | 'COURSE_REVIEW' | 'MINDMAP' | 'STUDYING' | 'ANALYTICS' | 'QUIZ' | 'PRIORITY_REVIEW' | 'WEAKNESS_REPORT' | 'PROFILE';
 
 export type StudyMode = 'NORMAL' | 'WEAKNESS' | 'SINGLE' | 'CHAPTER';
 
@@ -10,6 +10,7 @@ export interface QuizOption {
 }
 
 export interface InlineQuiz {
+  id: string;
   question: string;
   options: QuizOption[];
   correctAnswer: string;
@@ -92,6 +93,8 @@ export interface CourseStructureDraft {
 }
 
 export interface Quiz {
+  id: string;
+  conceptId: string;
   question: string;
   options: QuizOption[];
   correctAnswer: string;
@@ -140,4 +143,35 @@ export interface ProfileStats {
   masteryRate: number;
   retentionGrowth: number;
   activityDistribution: ActivityDay[];
+}
+
+export interface UserLlmSettings {
+  apiUrl: string;
+  model: string;
+  hasUserApiKey: boolean;
+  hasEffectiveApiKey: boolean;
+  apiKeyPreview?: string | null;
+}
+
+export interface StudyPlanTask {
+  id: string;
+  conceptId: string;
+  durationMinutes: number;
+  type: 'learn' | 'review' | 'test';
+  priority: number;
+  scheduledFor: string;
+}
+
+export interface StudyPlan {
+  id: string;
+  courseId: string;
+  generatedAt: string;
+  daysLeft: number;
+  tasks: StudyPlanTask[];
+}
+
+export interface BehaviorHint {
+  recommendedMinutes: number;
+  bestHour: number | null;
+  message: string;
 }

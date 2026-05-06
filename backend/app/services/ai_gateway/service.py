@@ -27,8 +27,10 @@ def generate_json(
     *,
     system_prompt: str | None = None,
     temperature: float = 0.2,
+    api_key: str | None = None,
 ) -> Any:
-    if not is_ai_configured():
+    resolved_api_key = (api_key or settings.llm_api_key or "").strip()
+    if not resolved_api_key:
         raise AiGatewayNotConfiguredError("LLM_API_KEY is not configured.")
 
     endpoint = settings.llm_api_url.rstrip("/") + "/chat/completions"
@@ -57,14 +59,14 @@ def generate_json(
         "response_format": {"type": "json_object"},
     }
     try:
-        response = _post_chat_completion(endpoint, request_payload)
+        response = _post_chat_completion(endpoint, request_payload, resolved_api_key)
     except httpx.HTTPError as exc:
         raise AiGatewayError(f"LLM request failed: {exc}") from exc
 
     if response.status_code == 400 and "response_format" in response.text:
         request_payload.pop("response_format", None)
         try:
-            response = _post_chat_completion(endpoint, request_payload)
+            response = _post_chat_completion(endpoint, request_payload, resolved_api_key)
         except httpx.HTTPError as exc:
             raise AiGatewayError(f"LLM request failed: {exc}") from exc
 
@@ -82,11 +84,11 @@ def generate_json(
     return parse_json_content(content)
 
 
-def _post_chat_completion(endpoint: str, payload: dict[str, Any]) -> httpx.Response:
+def _post_chat_completion(endpoint: str, payload: dict[str, Any], api_key: str) -> httpx.Response:
     return httpx.post(
         endpoint,
         headers={
-            "Authorization": f"Bearer {settings.llm_api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         },
         json=payload,

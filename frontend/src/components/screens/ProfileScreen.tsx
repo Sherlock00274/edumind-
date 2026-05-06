@@ -1,33 +1,40 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  CheckCircle2,
   BookOpen,
   BookMarked,
   BrainCircuit,
   Calendar,
   ChevronRight,
   Clock,
+  KeyRound,
   History,
   LogOut,
   Sparkles,
+  Target,
   TrendingUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { getAuthToken, getCurrentUser, getProfileStats, getUserProgress, login, logout, register } from '../../services/apiService';
-import { ProfileStats, UserAccount, UserProgress } from '../../types';
+import { getAuthToken, getCurrentStudyPlan, getCurrentUser, getProfileStats, getUserLlmSettings, getUserProgress, login, logout, register, updateUserLlmSettings } from '../../services/apiService';
+import { ProfileStats, StudyPlan, UserAccount, UserLlmSettings, UserProgress } from '../../types';
 
 interface ProfileScreenProps {
   setAppState: (state: string) => void;
   userProgress: UserProgress;
+  activeCourseId: string | null;
+  behaviorHint: string;
   onAuthChange: () => void;
   onLogout: () => void;
 }
 
-type ProfileTab = 'OVERVIEW' | 'HISTORY' | 'PLAN';
+type ProfileTab = 'OVERVIEW' | 'HISTORY' | 'PLAN' | 'SETTINGS';
 type AuthMode = 'LOGIN' | 'REGISTER';
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   setAppState,
   userProgress,
+  activeCourseId,
+  behaviorHint,
   onAuthChange,
   onLogout,
 }) => {
@@ -35,7 +42,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const [authMode, setAuthMode] = useState<AuthMode>('LOGIN');
   const [user, setUser] = useState<UserAccount | null>(null);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [progress, setProgress] = useState<UserProgress>(userProgress);
+  const [llmSettings, setLlmSettings] = useState<UserLlmSettings | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [settingsMessage, setSettingsMessage] = useState('');
+  const [isSavingApiKey, setIsSavingApiKey] = useState(false);
   const [name, setName] = useState('Felix Wang');
   const [email, setEmail] = useState('felix@example.com');
   const [password, setPassword] = useState('password');
@@ -44,14 +56,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const loadProfile = async () => {
-    const [currentUser, profileStats, latestProgress] = await Promise.all([
+    const [currentUser, profileStats, latestProgress, currentLlmSettings] = await Promise.all([
       getCurrentUser(),
       getProfileStats(),
       getUserProgress(),
+      getUserLlmSettings().catch(() => null),
     ]);
     setUser(currentUser);
     setStats(profileStats);
     setProgress(latestProgress);
+    setLlmSettings(currentLlmSettings);
+    if (activeCourseId) {
+      setPlan(await getCurrentStudyPlan(activeCourseId).catch(() => null));
+    }
   };
 
   useEffect(() => {
@@ -69,7 +86,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [activeCourseId]);
 
   const handleAuth = async () => {
     setAuthError('');
@@ -78,9 +95,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         ? await login(email, password)
         : await register(name, email, password, subject);
       setUser(account);
-      const [profileStats, latestProgress] = await Promise.all([getProfileStats(), getUserProgress()]);
+      const [profileStats, latestProgress, currentLlmSettings] = await Promise.all([getProfileStats(), getUserProgress(), getUserLlmSettings().catch(() => null)]);
       setStats(profileStats);
       setProgress(latestProgress);
+      setLlmSettings(currentLlmSettings);
       onAuthChange();
     } catch (error) {
       setAuthError(authMode === 'LOGIN' ? 'Login failed. Check your email and password.' : 'Registration failed. Try a different email.');
@@ -91,6 +109,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     logout();
     setUser(null);
     setStats(null);
+    setPlan(null);
+    setLlmSettings(null);
+    setApiKeyInput('');
+    setSettingsMessage('');
     setProgress({
       totalStudyTime: 0,
       sessions: [],
@@ -117,7 +139,23 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     { id: 'OVERVIEW' as const, label: 'Overview', icon: TrendingUp },
     { id: 'HISTORY' as const, label: 'History', icon: History },
     { id: 'PLAN' as const, label: 'Future', icon: Calendar },
+    { id: 'SETTINGS' as const, label: 'Settings', icon: KeyRound },
   ];
+
+  const handleSaveApiKey = async () => {
+    setIsSavingApiKey(true);
+    setSettingsMessage('');
+    try {
+      const nextSettings = await updateUserLlmSettings(apiKeyInput);
+      setLlmSettings(nextSettings);
+      setApiKeyInput('');
+      setSettingsMessage(nextSettings.hasUserApiKey ? 'API Key saved to this local app profile.' : 'Custom API Key cleared. The app will use the environment key if available.');
+    } catch (error) {
+      setSettingsMessage('Failed to save API Key.');
+    } finally {
+      setIsSavingApiKey(false);
+    }
+  };
 
   if (isLoading) {
     return <div className="px-6 pt-20 text-sm font-bold text-slate-400">Loading profile...</div>;
@@ -257,12 +295,28 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <Sparkles size={18} />
                 <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-80">Backend Forecast</span>
               </div>
-              <h3 className="text-lg font-black leading-tight mb-2">{progress.upcomingReviews.length || 0} concepts queued for future review.</h3>
-              <p className="text-blue-100 text-sm font-medium opacity-80 leading-relaxed">Generated from weak concepts and scheduled review candidates.</p>
+              <h3 className="text-lg font-black leading-tight mb-2">{plan?.tasks.length ?? progress.upcomingReviews.length ?? 0} adaptive tasks queued.</h3>
+              <p className="text-blue-100 text-sm font-medium opacity-80 leading-relaxed">{behaviorHint || 'Generated from weak concepts, response latency, and scheduled review candidates.'}</p>
             </div>
-            <h3 className="text-[15px] font-black text-slate-900 px-1 mb-4 flex items-center gap-2">Scheduled Reviews <Calendar size={18} className="text-slate-300" /></h3>
-            {progress.upcomingReviews.length === 0 && <EmptyState text="No scheduled reviews yet." />}
-            {progress.upcomingReviews.map((review) => (
+            <h3 className="text-[15px] font-black text-slate-900 px-1 mb-4 flex items-center gap-2">Adaptive Plan <Calendar size={18} className="text-slate-300" /></h3>
+            {!plan && progress.upcomingReviews.length === 0 && <EmptyState text="No scheduled reviews yet." />}
+            {plan?.tasks.slice(0, 8).map((task) => (
+              <div key={task.id} className="bg-white border border-slate-100 p-5 rounded-[28px] shadow-sm flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <Target className="text-blue-500" size={20} />
+                </div>
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="text-[14px] font-black text-slate-900 truncate mb-1">{task.type.toUpperCase()} • {task.durationMinutes} min</p>
+                  <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
+                    <Clock size={10} /> {new Date(task.scheduledFor).toLocaleDateString([], { month: 'short', day: 'numeric' })} • Priority {task.priority.toFixed(2)}
+                  </p>
+                </div>
+                <button onClick={() => setAppState('HOME')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm active:scale-90">
+                  <ChevronRight size={18} strokeWidth={3} />
+                </button>
+              </div>
+            ))}
+            {!plan && progress.upcomingReviews.map((review) => (
               <div key={review.conceptId} className="bg-white border border-slate-100 p-5 rounded-[28px] shadow-sm flex items-center gap-4 group">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
                   <BookMarked className="text-blue-500" size={20} />
@@ -278,6 +332,78 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </button>
               </div>
             ))}
+          </motion.div>
+        )}
+
+        {activeTab === 'SETTINGS' && (
+          <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
+            <div className="rounded-[32px] bg-slate-900 p-6 text-white shadow-xl">
+              <div className="mb-3 flex items-center gap-2">
+                <KeyRound size={18} />
+                <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-80">LLM Settings</span>
+              </div>
+              <h3 className="mb-2 text-lg font-black">DashScope / OpenAI-compatible key</h3>
+              <p className="text-sm font-medium leading-relaxed text-slate-300">
+                The key is saved locally for the current account and used by the backend when parsing syllabus and course materials.
+              </p>
+            </div>
+
+            <div className="rounded-[28px] border border-slate-100 bg-white p-5 shadow-sm space-y-4">
+              <div className="grid gap-3 text-[12px] font-bold text-slate-500">
+                <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                  <div className="mb-1 text-[10px] uppercase tracking-[0.18em] text-slate-400">API URL</div>
+                  <div className="break-all text-slate-800">{llmSettings?.apiUrl ?? 'https://dashscope.aliyuncs.com/compatible-mode/v1'}</div>
+                </div>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                  <div className="mb-1 text-[10px] uppercase tracking-[0.18em] text-slate-400">Model</div>
+                  <div className="text-slate-800">{llmSettings?.model ?? 'deepseek-v4-flash'}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                  <CheckCircle2 size={14} className={(llmSettings?.hasEffectiveApiKey ?? false) ? 'text-emerald-500' : 'text-slate-300'} />
+                  Current Status
+                </div>
+                <p className="text-sm font-bold text-slate-800">
+                  {llmSettings?.hasUserApiKey
+                    ? `Using saved personal key ${llmSettings.apiKeyPreview ? `(${llmSettings.apiKeyPreview})` : ''}.`
+                    : llmSettings?.hasEffectiveApiKey
+                      ? 'No personal key saved. Using backend environment key.'
+                      : 'No API Key configured yet.'}
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                  Personal API Key
+                </label>
+                <input
+                  value={apiKeyInput}
+                  type="password"
+                  onChange={event => setApiKeyInput(event.target.value)}
+                  placeholder="Enter a new key, or leave blank to clear"
+                  className="w-full rounded-2xl bg-slate-50 px-4 py-4 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/10"
+                />
+                <p className="mt-2 text-[11px] font-medium text-slate-400">
+                  Saving an empty value clears your personal key.
+                </p>
+              </div>
+
+              {settingsMessage && (
+                <p className={`rounded-xl px-3 py-2 text-[11px] font-bold ${settingsMessage.includes('Failed') ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-700'}`}>
+                  {settingsMessage}
+                </p>
+              )}
+
+              <button
+                onClick={handleSaveApiKey}
+                disabled={isSavingApiKey}
+                className="w-full rounded-[22px] bg-blue-600 py-4 text-sm font-black text-white shadow-xl shadow-blue-600/20 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSavingApiKey ? 'Saving...' : 'Save API Key'}
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

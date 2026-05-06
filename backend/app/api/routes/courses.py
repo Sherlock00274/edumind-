@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
 from app.api.deps import CurrentUser
+from app.core.config import settings
 from app.schemas.concept import CardView
 from app.schemas.course import (
     BatchDocumentIngestRead,
@@ -16,9 +17,11 @@ from app.schemas.course import (
     SourceDocumentRead,
     TextIngestRequest,
 )
+from app.schemas.question import QuestionView, UserAnswerCreate, UserAnswerResult
 from app.services.course_parsing.document_ingest import extract_uploaded_document
 from app.services.course_parsing.service import parse_text_to_cards
 from app.services.course_parsing.syllabus_parser import parse_syllabus_to_structure
+from app.services.diagnostic.service import generate_diagnostic_questions
 from app.services.in_memory import store
 
 router = APIRouter(prefix="/courses", tags=["courses"])
@@ -34,15 +37,15 @@ async def analyze_syllabus(
     file: Annotated[UploadFile, File()],
     user: CurrentUser,
 ) -> CourseStructureDraft:
-    del user
     content = await file.read()
     if not content:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Syllabus file is empty",
         )
-    extracted = await extract_uploaded_document(file.filename or "syllabus", content)
-    return parse_syllabus_to_structure(extracted.text, extracted.filename)
+    api_key = store.resolve_llm_api_key(user.id, settings.llm_api_key)
+    extracted = await extract_uploaded_document(file.filename or "syllabus", content, api_key=api_key)
+    return parse_syllabus_to_structure(extracted.text, extracted.filename, api_key=api_key)
 
 
 @router.get("", response_model=list[CourseRead])
@@ -87,7 +90,11 @@ def ingest_text_document(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
 
     document = store.add_text_document(course_id, payload.filename, payload.document_type)
-    cards = parse_text_to_cards(course_id, payload.content)
+    cards = parse_text_to_cards(
+        course_id,
+        payload.content,
+        api_key=store.resolve_llm_api_key(user.id, settings.llm_api_key),
+    )
     store.set_generated_cards(course_id, cards)
     return document
 
@@ -109,6 +116,7 @@ async def ingest_file_documents(
         )
 
     scope = document_scope(chapter_ids)
+    api_key = store.resolve_llm_api_key(user.id, settings.llm_api_key)
     documents: list[SourceDocumentRead] = []
     cards: list[CardView] = []
     chapters = store.list_chapters(course_id)
@@ -117,7 +125,11 @@ async def ingest_file_documents(
         content = await file.read()
         if not content:
             continue
-        extracted = await extract_uploaded_document(file.filename or "uploaded-file", content)
+        extracted = await extract_uploaded_document(
+            file.filename or "uploaded-file",
+            content,
+            api_key=api_key,
+        )
         assigned_chapters = chapter_ids or infer_chapter_ids(
             extracted.text,
             chapters,
@@ -135,7 +147,7 @@ async def ingest_file_documents(
             f"Document type: {extracted.document_type.value}\n\n"
             f"{extracted.text}"
         )
-        parsed_cards = parse_text_to_cards(course_id, section)
+        parsed_cards = parse_text_to_cards(course_id, section, api_key=api_key)
         if course is not None:
             assign_cards_to_chapters(parsed_cards, course, chapters, assigned_chapters)
         cards.extend(parsed_cards)
@@ -172,6 +184,27 @@ def list_documents(course_id: str, user: CurrentUser) -> list[SourceDocumentRead
     if store.get_course(course_id, user.id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
     return store.list_documents(course_id)
+
+
+@router.get("/{course_id}/diagnostic/questions", response_model=list[QuestionView])
+def get_diagnostic_questions(course_id: str, user: CurrentUser) -> list[QuestionView]:
+    if store.get_course(course_id, user.id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+    return generate_diagnostic_questions(store.list_concepts(course_id))
+
+
+@router.post("/{course_id}/answers", response_model=UserAnswerResult)
+def submit_answer(
+    course_id: str,
+    payload: UserAnswerCreate,
+    user: CurrentUser,
+) -> UserAnswerResult:
+    if store.get_course(course_id, user.id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+    result = store.record_quiz_answer(user.id, course_id, payload)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+    return result
 
 
 def document_scope(chapter_ids: list[str]) -> DocumentScope:

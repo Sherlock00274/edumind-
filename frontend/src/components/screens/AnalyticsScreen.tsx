@@ -1,183 +1,233 @@
-import React from 'react';
-import { TrendingDown, Flame, CheckCircle2, ChevronDown, BrainCircuit, Sparkles, XCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useMemo } from 'react';
+import {
+  ArrowRight,
+  BrainCircuit,
+  CheckCircle2,
+  Clock3,
+  Flame,
+  Layers3,
+  Sparkles,
+  Target,
+  TrendingDown,
+} from 'lucide-react';
+import { motion } from 'motion/react';
 import { Card } from '../../types';
 
 interface AnalyticsScreenProps {
   weakCards: Card[];
   resolvedToday: number;
   weakPool: string[];
-  maxErrorCount: number;
+  reviewedConceptCount: number;
+  unseenConceptCount: number;
+  behaviorHint: string;
   handleStartStudy: (mode: any, payload?: any) => void;
-  expandedQuizId: string | null;
-  toggleExpandQuiz: (id: string) => void;
-  inlineAnswers: Record<string, string | null>;
-  handleInlineQuizSelect: (id: string, optId: string, correct: string) => void;
 }
 
 export const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({
   weakCards,
   resolvedToday,
   weakPool,
-  maxErrorCount,
+  reviewedConceptCount,
+  unseenConceptCount,
+  behaviorHint,
   handleStartStudy,
-  expandedQuizId,
-  toggleExpandQuiz,
-  inlineAnswers,
-  handleInlineQuizSelect,
 }) => {
+  const headline = useMemo(() => {
+    if (weakCards.length === 0) {
+      return {
+        title: 'No urgent review blockers',
+        subtitle: reviewedConceptCount > 0
+          ? 'None of your reviewed concepts currently need urgent follow-up. Keep momentum with normal study.'
+          : 'You have not reviewed any concepts yet. Start normal study first before expecting a priority queue.',
+      };
+    }
+
+    if (weakCards.length <= 3) {
+      return {
+        title: 'A short recovery pass will stabilize this',
+        subtitle: 'You only have a few weak concepts left. Clear them now before they compound.',
+      };
+    }
+
+    return {
+      title: 'Your next best action is a priority review',
+      subtitle: 'Do a focused weak-point pass first, then return to broader study when the fragile concepts are stable again.',
+    };
+  }, [weakCards.length]);
+
+  const topCard = weakCards[0] ?? null;
+  const averageMastery = weakCards.length
+    ? Math.round((weakCards.reduce((sum, card) => sum + card.mastery, 0) / weakCards.length) * 100)
+    : 100;
+  const chapterSpread = new Set(weakCards.map(card => card.chapter)).size;
+
+  const nextActionLabel = weakCards.length === 0
+    ? 'Return to normal study'
+    : `Start Priority Review (${weakCards.length})`;
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="px-6 pt-16"
+      className="px-6 pt-16 pb-24"
     >
-      <header className="mb-8 flex justify-between items-end">
+      <header className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Analytics</h1>
-          <p className="text-slate-400 text-[13px] font-medium mt-1">Optimization through data</p>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">Analytics</h1>
+          <p className="mt-1 text-[13px] font-medium text-slate-400">Decide what to do next, not just what went wrong.</p>
         </div>
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          className="text-[11px] font-black bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm border border-emerald-100/50"
-        >
-          <CheckCircle2 size={12}/> {resolvedToday} CLEARED
-        </motion.div>
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-emerald-600">
+          {resolvedToday} cleared today
+        </div>
       </header>
 
-      <div className="w-full p-6 bg-white border border-slate-100 rounded-[32px] shadow-[0_12px_40px_rgba(0,0,0,0.03)] mb-10 overflow-hidden relative">
-        <div className="absolute top-0 right-0 p-4 opacity-5">
-            <TrendingDown size={120} />
-        </div>
-        <div className="flex items-center gap-2 mb-6 text-[15px] font-black text-slate-800 relative z-10">
-          <TrendingDown size={18} className="text-orange-500"/> Critical Vulnerabilities
-        </div>
+      <div className="relative mb-8 overflow-hidden rounded-[36px] border border-slate-100 bg-slate-900 p-6 text-white shadow-[0_18px_60px_rgba(15,23,42,0.18)]">
+        <div className="absolute right-0 top-0 h-40 w-40 translate-x-8 -translate-y-8 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-32 w-32 -translate-x-8 translate-y-8 rounded-full bg-orange-400/20 blur-3xl" />
 
+        <div className="relative z-10">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-blue-100">
+            <TrendingDown size={12} /> Next best move
+          </div>
+          <h2 className="max-w-[240px] text-[28px] font-black leading-[1.05] tracking-tight">{headline.title}</h2>
+          <p className="mt-3 max-w-[290px] text-[13px] font-medium leading-relaxed text-slate-300">{headline.subtitle}</p>
+
+          <div className="mt-6 grid grid-cols-3 gap-2.5">
+            <Metric label="Need review" value={String(weakPool.length)} icon={<Flame size={14} />} />
+            <Metric label="Avg mastery" value={`${averageMastery}%`} icon={<Target size={14} />} />
+            <Metric label="Reviewed" value={String(reviewedConceptCount)} icon={<Layers3 size={14} />} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-8 grid grid-cols-2 gap-3">
+        <div className="rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm">
+          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Reviewed concepts</div>
+          <div className="mt-2 text-[30px] font-black tracking-tight text-slate-900">{reviewedConceptCount}</div>
+          <p className="mt-1 text-[12px] font-medium leading-relaxed text-slate-500">These are concepts you have already touched in study or quiz flows.</p>
+        </div>
+        <div className="rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm">
+          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Unseen concepts</div>
+          <div className="mt-2 text-[30px] font-black tracking-tight text-slate-900">{unseenConceptCount}</div>
+          <p className="mt-1 text-[12px] font-medium leading-relaxed text-slate-500">Unseen concepts are excluded from Priority Review until you actually study them.</p>
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-[32px] border border-slate-100 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.16em] text-slate-400">
+          <Sparkles size={14} className="text-blue-500" /> Recommended flow
+        </div>
+        <div className="space-y-3">
+          <FlowStep index="1" title="Review studied weak points" description="Start a focused pass only on concepts you have already touched and not yet stabilized." />
+          <FlowStep index="2" title="Answer one check question per concept" description="Each item gets a single decision: stable enough to clear, or still unsure and needs another pass." />
+          <FlowStep index="3" title="Read the summary and choose the next move" description="After the pass, either return to normal study or immediately retry the remaining weak concepts." />
+        </div>
+      </div>
+
+      {topCard && (
+        <div className="mb-8 rounded-[32px] border border-orange-100 bg-orange-50/60 p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-orange-500">
+            <BrainCircuit size={14} /> First concept in queue
+          </div>
+          <h3 className="text-[20px] font-black leading-tight text-slate-900">{topCard.conceptEn}</h3>
+          <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            {topCard.chapter.split(' > ')[1] || topCard.chapter}
+          </p>
+          <p className="mt-3 text-[13px] font-medium leading-relaxed text-slate-600">
+            {topCard.errorCount >= 3
+              ? 'This one is already recurring. Clear it first so the rest of the study session does not keep collapsing around the same rule.'
+              : 'This is the cleanest place to restart. A fast review here reduces the chance that the weak pool grows later today.'}
+          </p>
+        </div>
+      )}
+
+      <div className="mb-5 flex items-center justify-between px-1">
+        <h3 className="text-[15px] font-black tracking-tight text-slate-900">Studied concepts that need attention</h3>
+        <span className="rounded-full bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+          {weakCards.length} in priority review
+        </span>
+      </div>
+
+      <div className="space-y-3">
         {weakCards.length === 0 ? (
-          <div className="py-10 text-center bg-slate-50/50 rounded-[24px] border border-dashed border-slate-200">
-            <Sparkles className="mx-auto text-blue-400 mb-3" size={24}/>
-            <p className="text-sm font-bold text-slate-400">Knowledge loop successfully closed.</p>
+          <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <CheckCircle2 className="mx-auto mb-3 text-emerald-500" size={26} />
+            <p className="text-sm font-bold text-slate-500">Nothing urgent is waiting in the review queue.</p>
           </div>
         ) : (
-          <div className="space-y-5 relative z-10">
-            {weakCards.slice(0, 3).map((card, idx) => {
-              const barWidth = `${Math.max((card.errorCount / maxErrorCount) * 100, 10)}%`; 
-              const isTop = idx === 0;
-              return (
-                <motion.div 
-                  layout
-                  key={card.id} 
-                  className="flex flex-col gap-2 cursor-pointer group" 
-                  onClick={() => handleStartStudy('SINGLE', card.id)}
-                >
-                  <div className="flex justify-between items-end">
-                    <span className={`font-black truncate pr-4 text-[14px] transition-colors ${isTop ? 'text-orange-600' : 'text-slate-600 group-hover:text-blue-600'}`}>
-                      {isTop && <Flame size={14} className="inline mr-1.5 mb-0.5 fill-orange-200"/>}{card.conceptEn}
+          weakCards.slice(0, 6).map((card, index) => (
+            <div key={card.id} className="rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${index === 0 ? 'bg-orange-500 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                  <BrainCircuit size={18} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="truncate pr-3 text-[15px] font-black text-slate-900">{card.conceptEn}</h4>
+                    <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.18em] text-slate-300">
+                      {card.errorCount} misses
                     </span>
-                    <span className="shrink-0 font-black text-slate-300 text-[11px]">{card.errorCount} MISSES</span>
                   </div>
-                  <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: barWidth }}
-                      transition={{ duration: 1.2, ease: "circOut" }}
-                      className={`h-full rounded-full ${isTop ? 'bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.3)]' : 'bg-blue-400 group-hover:bg-blue-600'}`} 
-                    />
+                  <p className="mt-1 truncate text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                    {card.chapter.split(' > ')[1] || card.chapter}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-[12px] font-medium text-slate-500">
+                    <Clock3 size={13} className="text-slate-300" />
+                    {card.mastery < 0.45
+                      ? 'Low stability. Needs an immediate check.'
+                      : 'Partially known. Confirm the rule with one question.'}
                   </div>
-                  {isTop && (
-                    <motion.button 
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      whileHover={{ scale: 1.02, backgroundColor: '#f8fafc' }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={(e) => { e.stopPropagation(); }}
-                      className="mt-3 py-2.5 px-4 bg-white border border-orange-100 text-orange-600 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      <Sparkles size={12} strokeWidth={3} /> AI Deep Diagnostic
-                    </motion.button>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      <div className="flex items-center justify-between mb-5 px-1 truncate">
-        <h3 className="text-[15px] font-black text-slate-800 tracking-tight">Priority Review Pool</h3>
-        <span className="text-[11px] font-black text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">{weakPool.length} REQUIRES ATTENTION</span>
+      <div className="mt-6 rounded-[28px] border border-blue-100 bg-blue-50/70 p-5">
+        <div className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-blue-500">Study guidance</div>
+        <p className="text-[13px] font-medium leading-relaxed text-slate-600">
+          {behaviorHint || 'Clear the weak pool first, then go back to broader study only after the fragile concepts stop failing quick checks.'}
+        </p>
       </div>
-      
-      <div className="w-full pb-20">
-        <div className="space-y-4">
-          {weakCards.map((item) => (
-            <div key={item.id} className="bg-white border border-slate-100 hover:border-blue-100 shadow-sm rounded-[28px] overflow-hidden transition-all group">
-              <div className={`p-4 flex items-center justify-between cursor-pointer transition-colors ${expandedQuizId === item.id ? 'bg-slate-50' : ''}`} onClick={() => toggleExpandQuiz(item.id)}>
-                <div className="flex items-center gap-4 truncate pr-4">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-all ${expandedQuizId === item.id ? 'bg-blue-600 text-white rotate-12' : 'bg-slate-50 text-slate-400'}`}>
-                    <BrainCircuit size={18} />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[14px] font-black text-slate-800 block truncate leading-tight">{item.conceptEn}</span>
-                    <span className="text-[10px] text-slate-400 font-bold block truncate mt-1 uppercase tracking-wider">{item.chapter.split(' > ')[1]}</span>
-                  </div>
-                </div>
-                <ChevronDown size={18} className={`text-slate-300 transition-transform duration-500 ${expandedQuizId === item.id ? 'rotate-180' : 'group-hover:text-slate-500'}`}/>
-              </div>
 
-              <AnimatePresence>
-                {expandedQuizId === item.id && (
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-6 pb-6 pt-2">
-                       <div className="p-4 bg-slate-50 rounded-[24px] mb-5 border border-slate-100">
-                          <p className="text-[13px] font-bold text-slate-700 leading-relaxed">{item.inlineQuiz.question}</p>
-                       </div>
-                       <div className="grid grid-cols-1 gap-3">
-                        {item.inlineQuiz.options.map((opt) => {
-                          const selectedOpt = inlineAnswers[item.id];
-                          const isCorrect = opt.id === item.inlineQuiz.correctAnswer;
-                          const showResult = selectedOpt !== undefined && selectedOpt !== null;
-                          const isThisSelected = selectedOpt === opt.id;
-                          
-                          let btnStyle = "w-full text-left px-5 py-4 rounded-[20px] text-[13px] font-bold border transition-all flex items-center justify-between ";
-                          let icon = null;
-
-                          if (!showResult) btnStyle += "bg-white border-slate-100 text-slate-600 hover:border-blue-500 active:scale-[0.98]";
-                          else if (isCorrect) { btnStyle += "bg-emerald-50 border-emerald-500 text-emerald-800"; icon = <CheckCircle2 size={18} className="text-emerald-500 shrink-0"/>; }
-                          else if (isThisSelected && !isCorrect) { btnStyle += "bg-rose-50 border-rose-500 text-rose-800"; icon = <XCircle size={18} className="text-rose-500 shrink-0"/>; }
-                          else btnStyle += "bg-white border-slate-50 text-slate-300 opacity-40";
-
-                          return (
-                            <button key={opt.id} disabled={showResult} onClick={() => handleInlineQuizSelect(item.id, opt.id, item.inlineQuiz.correctAnswer)} className={btnStyle}>
-                              <span className="pr-2">{opt.text}</span>{icon}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-          
-          {weakPool.length > 0 && (
-            <motion.button 
-              layout
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleStartStudy('WEAKNESS')} 
-              className="w-full mt-6 py-4 bg-slate-900 text-white font-black text-[15px] rounded-[24px] shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3"
-            >
-              <Sparkles size={18}/> Rapid Weakness Recovery
-            </motion.button>
-          )}
-        </div>
-      </div>
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        onClick={() => weakCards.length === 0 ? handleStartStudy('NORMAL') : handleStartStudy('WEAKNESS')}
+        className="mt-6 flex w-full items-center justify-center gap-3 rounded-[26px] bg-slate-900 py-4 text-[15px] font-black text-white shadow-xl shadow-slate-900/20"
+      >
+        {nextActionLabel} <ArrowRight size={18} />
+      </motion.button>
     </motion.div>
   );
 };
+
+const Metric = ({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) => (
+  <div className="rounded-[22px] bg-white/8 px-3 py-3 backdrop-blur-sm">
+    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-slate-300">
+      {icon}
+      {label}
+    </div>
+    <div className="mt-2 text-[24px] font-black leading-none text-white">{value}</div>
+  </div>
+);
+
+const FlowStep = ({
+  index,
+  title,
+  description,
+}: {
+  index: string;
+  title: string;
+  description: string;
+}) => (
+  <div className="flex items-start gap-3 rounded-[22px] bg-slate-50 px-4 py-3">
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-black text-blue-600 shadow-sm">
+      {index}
+    </div>
+    <div>
+      <div className="text-[13px] font-black text-slate-900">{title}</div>
+      <p className="mt-1 text-[12px] font-medium leading-relaxed text-slate-500">{description}</p>
+    </div>
+  </div>
+);

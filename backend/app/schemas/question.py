@@ -26,3 +26,14 @@ class UserAnswerCreate(BaseModel):
     confidence: float = Field(ge=0, le=1)
     response_time: float = Field(alias="responseTime", ge=0)
     selected_answer: str = Field(alias="selectedAnswer")
+
+
+class UserAnswerResult(BaseModel):
+    question_id: str = Field(alias="questionId")
+    concept_id: str = Field(alias="conceptId")
+    correct: bool
+    answer: str
+    mastery: float
+    confidence: float
+    avg_response_time: float = Field(alias="avgResponseTime")
+    error_count: int = Field(alias="errorCount")

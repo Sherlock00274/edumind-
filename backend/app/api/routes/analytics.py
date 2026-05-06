@@ -3,8 +3,13 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser
-from app.schemas.analytics import CourseAnalyticsRead, StudySessionSummary, UpcomingReview
-from app.schemas.concept import ConceptStateRead
+from app.schemas.analytics import (
+    BehaviorHintRead,
+    CourseAnalyticsRead,
+    StudySessionSummary,
+    UpcomingReview,
+)
+from app.services.behavior_activation.service import analyze_behavior
 from app.services.in_memory import store
 
 router = APIRouter(tags=["analytics"])
@@ -15,27 +20,34 @@ def get_course_analytics(course_id: str, user: CurrentUser) -> CourseAnalyticsRe
     if store.get_course(course_id, user.id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
     cards = store.get_cards(course_id)
-    weak_cards = [card for card in cards if card.error_count > 0 or card.mastery < 0.6]
     mastery_rate = sum(card.mastery for card in cards) / max(len(cards), 1)
     sessions = store.list_session_records(user.id, course_id)
+    completed_sessions = [session for session in sessions if session.completed_at is not None]
+    concept_states = store.list_concept_states(course_id, user.id)
+    state_by_id = {state.concept_id: state for state in concept_states}
+    reviewed_states = [state for state in concept_states if state.last_reviewed_at is not None]
+    reviewed_state_ids = {state.concept_id for state in reviewed_states}
+    weak_state_ids = {
+        state.concept_id
+        for state in reviewed_states
+        if state.error_count > 0 or state.mastery < 0.6
+    }
+    weak_cards = [card for card in cards if card.id in weak_state_ids]
+    behavior_hint = analyze_behavior(completed_sessions, sessions)
+    today = datetime.now(UTC).date()
+    resolved_today = sum(
+        session.mastered
+        for session in completed_sessions
+        if isinstance(session.completed_at, datetime) and session.completed_at.date() == today
+    )
     return CourseAnalyticsRead(
         masteryRate=mastery_rate,
-        resolvedToday=0,
+        resolvedToday=resolved_today,
         weakPoolCount=len(weak_cards),
+        reviewedConceptCount=len(reviewed_states),
+        unseenConceptCount=max(len(cards) - len(reviewed_state_ids), 0),
         weakConcepts=weak_cards,
-        conceptStates=[
-            ConceptStateRead(
-                conceptId=card.id,
-                mastery=card.mastery,
-                confidence=0.5,
-                avgResponseTime=0,
-                errorCount=card.error_count,
-                lastReviewedAt=None,
-                nextReviewAt=None,
-                errorPatterns=[],
-            )
-            for card in cards
-        ],
+        conceptStates=concept_states,
         sessions=[
             StudySessionSummary(
                 id=session.id,
@@ -47,9 +59,18 @@ def get_course_analytics(course_id: str, user: CurrentUser) -> CourseAnalyticsRe
             for session in sessions
         ],
         upcomingReviews=[
-            UpcomingReview(conceptId=card.id, conceptName=card.concept_en, scheduledTime=0)
+            UpcomingReview(
+                conceptId=card.id,
+                conceptName=card.concept_en,
+                scheduledTime=review_time_for(card.id, state_by_id),
+            )
             for card in weak_cards[:3]
         ],
+        behaviorHint=BehaviorHintRead(
+            recommendedMinutes=behavior_hint.recommended_minutes,
+            bestHour=behavior_hint.best_hour,
+            message=behavior_hint.message,
+        ),
     )
 
 
@@ -70,12 +91,20 @@ def get_user_progress(user: CurrentUser) -> dict[str, object]:
         }
         for session in completed_sessions
     ]
-    weak_cards = [
-        card
-        for course in store.list_courses(user.id)
-        for card in store.get_cards(course.id)
-        if card.error_count > 0 or card.mastery < 0.6
-    ]
+    weak_cards = []
+    for course in store.list_courses(user.id):
+        cards = store.get_cards(course.id)
+        state_by_id = {
+            state.concept_id: state
+            for state in store.list_concept_states(course.id, user.id)
+            if state.last_reviewed_at is not None
+        }
+        weak_cards.extend(
+            card
+            for card in cards
+            if card.id in state_by_id
+            and (state_by_id[card.id].error_count > 0 or state_by_id[card.id].mastery < 0.6)
+        )
     return {
         "totalStudyTime": sum(session["duration"] for session in sessions),
         "sessions": sessions,
@@ -94,3 +123,14 @@ def timestamp_ms(value: object) -> int:
     if isinstance(value, datetime):
         return int(value.timestamp() * 1000)
     return 0
+
+
+def review_time_for(concept_id: str, state_by_id: dict[str, object]) -> int:
+    state = state_by_id.get(concept_id)
+    next_review_at = getattr(state, "next_review_at", None)
+    if isinstance(next_review_at, str):
+        try:
+            return int(datetime.fromisoformat(next_review_at).timestamp() * 1000)
+        except ValueError:
+            return timestamp_ms(datetime.now(UTC))
+    return timestamp_ms(datetime.now(UTC))

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, RotateCcw, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { SessionStats } from '../../types';
 
@@ -16,91 +16,103 @@ export const WeaknessReportScreen: React.FC<WeaknessReportScreenProps> = ({
 }) => {
   if (!sessionStats) return null;
 
+  const clearedRate = sessionStats.total === 0 ? 0 : Math.round((sessionStats.mastered / sessionStats.total) * 100);
+
   return (
-    <div className="flex flex-col h-full px-8 animate-in zoom-in-95 duration-500">
-      <div className="pt-24 pb-12 text-center">
-        <motion.div 
+    <div className="flex h-full flex-col bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.10),_transparent_34%),linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] px-8 pt-20 pb-10">
+      <div className="pb-10 text-center">
+        <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: 'spring', damping: 12, stiffness: 200 }}
-          className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-500/10"
+          transition={{ type: 'spring', damping: 14, stiffness: 220 }}
+          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-[28px] bg-emerald-50 text-emerald-500 shadow-xl shadow-emerald-500/10"
         >
-          <CheckCircle2 size={40} weight="fill" />
+          <CheckCircle2 size={38} />
         </motion.div>
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-black text-slate-800 mb-3 tracking-tight"
+          className="mb-3 text-3xl font-black tracking-tight text-slate-900"
         >
-          Session Complete
+          Priority Review Summary
         </motion.h2>
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-[14px] text-slate-400 font-medium"
-        >
-          Efficiency report generated for current cycle
-        </motion.p>
+        <p className="text-[14px] font-medium text-slate-400">
+          You finished the weak-point pass. Choose whether to clear the rest now or return to broader study.
+        </p>
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white border border-slate-100 rounded-[40px] p-8 shadow-sm mb-10"
+        transition={{ delay: 0.2 }}
+        className="mb-8 rounded-[40px] border border-slate-100 bg-white p-8 shadow-sm"
       >
-        <div className="flex justify-around text-center mb-8">
-          <div>
-            <div className="text-4xl font-black text-slate-800 tracking-tighter">{sessionStats.total}</div>
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Concepts</div>
-          </div>
-          <div className="w-[1.5px] bg-slate-100 h-10 mt-2"></div>
-          <div>
-            <div className="text-4xl font-black text-emerald-500 tracking-tighter">{sessionStats.mastered}</div>
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Mastered</div>
-          </div>
-          <div className="w-[1.5px] bg-slate-100 h-10 mt-2"></div>
-          <div>
-            <div className="text-4xl font-black text-orange-400 tracking-tighter">{sessionStats.unsure}</div>
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Retain</div>
-          </div>
+        <div className="mb-8 flex justify-around text-center">
+          <SummaryMetric label="Reviewed" value={String(sessionStats.total)} tone="text-slate-900" />
+          <div className="mt-2 h-10 w-px bg-slate-100" />
+          <SummaryMetric label="Cleared" value={String(sessionStats.mastered)} tone="text-emerald-500" />
+          <div className="mt-2 h-10 w-px bg-slate-100" />
+          <SummaryMetric label="Still unsure" value={String(sessionStats.unsure)} tone="text-orange-400" />
         </div>
 
-        <div className="p-5 bg-slate-50 rounded-[28px] border border-slate-100/50">
-          <div className="flex items-center gap-2.5 mb-2.5">
-            <Sparkles size={16} className="text-blue-500"/>
-            <span className="text-[13px] font-black text-slate-800 tracking-tight">AI Diagnostic</span>
+        <div className="rounded-[28px] border border-slate-100 bg-slate-50 p-5">
+          <div className="mb-2.5 flex items-center gap-2.5">
+            <Sparkles size={16} className="text-blue-500" />
+            <span className="text-[13px] font-black tracking-tight text-slate-800">What this means</span>
           </div>
-          <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
-            {sessionStats.total === 0 ? "Insufficient data." : 
-             sessionStats.mastered / sessionStats.total === 1 ? "Exceptional focus. Your semantic understanding of this branch is now complete." : 
-             sessionStats.mastered / sessionStats.total >= 0.5 ? "Solid recovery. A few edge cases remain; recommend a quick second pass in 4 hours." : 
-             "Low retention detected. Suggest revisiting the core heuristics in the knowledge map."}
+          <p className="text-[13px] font-medium leading-relaxed text-slate-500">
+            {sessionStats.total === 0
+              ? 'No weak concepts were available in this pass.'
+              : clearedRate === 100
+                ? 'You cleared every urgent concept in this review pass. Return to normal study while the queue is clean.'
+                : clearedRate >= 50
+                  ? 'You stabilized a meaningful part of the queue. Run another short pass only if you want to finish the remaining weak concepts now.'
+                  : 'Most of the queue is still unstable. Another weak-point pass is likely more valuable than switching back to broad study.'}
           </p>
         </div>
       </motion.div>
 
-      <div className="mt-auto pb-10 space-y-4">
+      <div className="mt-auto space-y-4">
         {sessionStats.unsure > 0 && (
-           <motion.button 
+          <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleStartStudy('WEAKNESS')} 
-            className="w-full py-5 rounded-[24px] bg-orange-500 text-white font-black text-[15px] shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
-           >
-              Rapid Retry Unsure Items
-           </motion.button>
+            onClick={() => handleStartStudy('WEAKNESS')}
+            className="flex w-full items-center justify-center gap-3 rounded-[24px] bg-orange-500 py-5 text-[15px] font-black text-white shadow-xl shadow-orange-500/20"
+          >
+            <RotateCcw size={18} /> Continue Priority Review
+          </motion.button>
         )}
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setAppState('ANALYTICS')} 
-          className="w-full py-5 rounded-[24px] font-black text-[15px] active:scale-95 transition-all bg-slate-900 text-white shadow-xl shadow-slate-900/10"
+          onClick={() => setAppState('HOME')}
+          className="flex w-full items-center justify-center gap-3 rounded-[24px] bg-slate-900 py-5 text-[15px] font-black text-white shadow-xl shadow-slate-900/10"
         >
-          Return to Dashboard
+          Return To Normal Study <ArrowRight size={18} />
         </motion.button>
+        <button
+          onClick={() => setAppState('ANALYTICS')}
+          className="w-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-slate-400"
+        >
+          Review analytics again
+        </button>
       </div>
     </div>
   );
 };
+
+const SummaryMetric = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: string;
+}) => (
+  <div>
+    <div className={`text-4xl font-black tracking-tighter ${tone}`}>{value}</div>
+    <div className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</div>
+  </div>
+);
